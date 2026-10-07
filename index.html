@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
 
-  <title>Alam Idaman QR Scanner</title>
+  <title>Alam Idaman Guard</title>
 
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      padding: 20px;
+      padding: 16px;
       font-family: Arial, sans-serif;
       background: #f5f6f8;
       color: #222;
@@ -26,24 +30,90 @@
 
     .container {
       width: 100%;
-      max-width: 500px;
+      max-width: 520px;
       margin: 0 auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 14px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
 
-    h2 {
+    .card {
+      background: #fff;
+      padding: 18px;
+      margin-bottom: 15px;
+      border-radius: 14px;
+      box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .header {
       text-align: center;
-      margin: 0 0 8px;
+      padding: 20px 18px;
+    }
+
+    .logo {
+      display: block;
+      width: 95px;
+      height: 95px;
+      object-fit: contain;
+      margin: 0 auto 12px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 25px;
+      font-weight: bold;
     }
 
     .subtitle {
-      text-align: center;
-      margin: 0 0 20px;
+      margin-top: 6px;
       color: #666;
       font-size: 15px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
+
+    select,
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      background: #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 8px;
+      background: #1a73e8;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    .btn-stop {
+      background: #666;
+    }
+
+    .btn-checkin {
+      background: #188038;
+      font-size: 18px;
     }
 
     #reader {
@@ -61,98 +131,576 @@
     }
 
     .message {
-      margin-top: 15px;
-      padding: 13px;
+      padding: 12px;
+      margin-top: 12px;
       border-radius: 8px;
       text-align: center;
-      background: #f0f0f0;
+      background: #f1f3f4;
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
-      border: 0;
+    .success {
+      background: #d9ead3;
+      color: #137333;
+    }
+
+    .error {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status {
+      padding: 12px;
+      margin-bottom: 15px;
       border-radius: 8px;
-      background: #1a73e8;
-      color: #fff;
-      font-size: 16px;
+      text-align: center;
+      font-size: 20px;
       font-weight: bold;
-      cursor: pointer;
     }
 
-    button:disabled {
-      background: #aaa;
-      cursor: not-allowed;
+    .status-valid {
+      background: #d9ead3;
+      color: #137333;
     }
 
-    .note {
-      margin-top: 15px;
+    .status-expired {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .detail-label {
+      color: #666;
+      flex: 0 0 42%;
+    }
+
+    .detail-value {
+      font-weight: bold;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .small-note {
+      margin-top: 10px;
       text-align: center;
       color: #777;
       font-size: 12px;
       line-height: 1.5;
     }
+
   </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-  <h2>Alam Idaman</h2>
 
-  <div class="subtitle">
-    <strong>Guard QR Scanner</strong>
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
+
+  <div class="card header">
+
+    <img
+      src="logo.png"
+      alt="Alam Idaman"
+      class="logo"
+    >
+
+    <h1 class="title">
+      Alam Idaman
+    </h1>
+
+    <div class="subtitle">
+      Guard Visitor Management
+    </div>
+
   </div>
 
-  <div id="reader"></div>
 
-  <div id="message" class="message">
-    Tekan START CAMERA untuk mula scan.
+  <!-- =====================================================
+       GUARD
+  ====================================================== -->
+
+  <div class="card">
+
+    <label for="guardName">
+      Nama Guard
+    </label>
+
+    <select id="guardName">
+
+      <option value="">
+        -- Pilih Guard --
+      </option>
+
+    </select>
+
   </div>
 
-  <button
-    id="startBtn"
-    type="button"
-    onclick="startScanner()"
+
+  <!-- =====================================================
+       QR SCANNER
+  ====================================================== -->
+
+  <div class="card">
+
+    <div class="section-title">
+      Scan Visitor QR
+    </div>
+
+    <div id="reader"></div>
+
+    <div
+      id="scannerMessage"
+      class="message"
+    >
+      Tekan START CAMERA untuk scan QR Visitor Pass.
+    </div>
+
+    <button
+      id="startBtn"
+      type="button"
+      onclick="startScanner()"
+    >
+      START CAMERA
+    </button>
+
+    <button
+      id="stopBtn"
+      type="button"
+      class="btn-stop"
+      onclick="stopScanner()"
+      disabled
+    >
+      STOP CAMERA
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       MANUAL SEARCH
+  ====================================================== -->
+
+  <div class="card">
+
+    <div class="section-title">
+      Manual Visitor ID
+    </div>
+
+    <input
+      id="visitorIdInput"
+      type="text"
+      placeholder="VIS-20261007-83BE0226"
+      autocomplete="off"
+    >
+
+    <button
+      type="button"
+      onclick="searchVisitor()"
+    >
+      SEARCH VISITOR
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       VISITOR RESULT
+  ====================================================== -->
+
+  <div
+    id="visitorResult"
+    class="card hidden"
   >
-    START CAMERA
-  </button>
 
-  <button
-    id="stopBtn"
-    type="button"
-    onclick="stopScanner()"
-    disabled
-  >
-    STOP CAMERA
-  </button>
+    <div class="section-title">
+      Visitor Information
+    </div>
 
-  <div class="note">
-    Pastikan akses kamera Chrome telah dibenarkan.
+
+    <div
+      id="visitorStatus"
+      class="status"
+    >
+      -
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Visitor ID
+      </div>
+
+      <div
+        id="detailVisitorId"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Unit Rumah
+      </div>
+
+      <div
+        id="detailUnit"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Nama Penduduk
+      </div>
+
+      <div
+        id="detailResident"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        No. Telefon
+      </div>
+
+      <div
+        id="detailPhone"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Jenis Pelawat
+      </div>
+
+      <div
+        id="detailVisitorType"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Nama Pelawat
+      </div>
+
+      <div
+        id="detailVisitorName"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        No. Plat
+      </div>
+
+      <div
+        id="detailPlate"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Jenis Kenderaan
+      </div>
+
+      <div
+        id="detailVehicle"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Tujuan Lawatan
+      </div>
+
+      <div
+        id="detailPurpose"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Valid From
+      </div>
+
+      <div
+        id="detailValidFrom"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Valid Until
+      </div>
+
+      <div
+        id="detailValidUntil"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
+
+    <!-- CHECK IN -->
+
+    <div
+      id="checkInArea"
+      class="hidden"
+    >
+
+      <button
+        id="checkInBtn"
+        type="button"
+        class="btn-checkin"
+        onclick="checkInVisitor()"
+      >
+        CHECK IN
+      </button>
+
+    </div>
+
+
+    <!-- ALREADY CHECKED IN -->
+
+    <div
+      id="alreadyCheckedIn"
+      class="message warning hidden"
+    >
+      SUDAH CHECK IN
+    </div>
+
   </div>
+
+
+  <!-- =====================================================
+       GLOBAL MESSAGE
+  ====================================================== -->
+
+  <div
+    id="globalMessage"
+    class="message hidden"
+  >
+  </div>
+
+
+  <div class="small-note">
+    Alam Idaman Visitor Management System
+  </div>
+
 
 </div>
 
+
 <script>
-
-const GUARD_WEB_APP =
-  'https://script.google.com/macros/s/AKfycbwIXzL_IzCqDHdYOOPEQHdvCzGhPRAVsr2XZBku-4ckXI0tBvYNsoeW2CPcyK_kBPy1Q/exec';
-
-let scanner = null;
-let scanning = false;
-let scanLocked = false;
 
 
 /* =========================================================
-   MESSAGE
+   API CONFIG
 ========================================================= */
 
-function setMessage(message) {
-  document.getElementById('message').textContent = message;
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbwIXzL_IzCqDHdYOOPEQHdvCzGhPRAVsr2XZBku-4ckXI0tBvYNsoeVw2CPcyK_kBPy1Q/exec';
+
+
+let scanner = null;
+
+let scanning = false;
+
+let scanLocked = false;
+
+let currentVisitor = null;
+
+
+/* =========================================================
+   PAGE LOAD
+========================================================= */
+
+window.addEventListener(
+  'load',
+  function() {
+
+    loadGuards();
+
+  }
+);
+
+
+/* =========================================================
+   LOAD GUARDS
+========================================================= */
+
+function loadGuards() {
+
+  const callbackName =
+    'guardCallback_' +
+    Date.now();
+
+
+  window[callbackName] =
+    function(response) {
+
+      try {
+
+        if (
+          !response ||
+          !response.success
+        ) {
+
+          showGlobalMessage(
+            'Senarai Guard tidak dapat dimuatkan.',
+            'error'
+          );
+
+          return;
+        }
+
+
+        const select =
+          document.getElementById(
+            'guardName'
+          );
+
+
+        select.innerHTML =
+          '<option value="">-- Pilih Guard --</option>';
+
+
+        response.guards.forEach(
+          function(guard) {
+
+            const option =
+              document.createElement(
+                'option'
+              );
+
+
+            option.value =
+              guard;
+
+
+            option.textContent =
+              guard;
+
+
+            select.appendChild(
+              option
+            );
+
+          }
+        );
+
+      }
+      finally {
+
+        delete window[
+          callbackName
+        ];
+
+
+        const script =
+          document.getElementById(
+            callbackName
+          );
+
+
+        if (script) {
+          script.remove();
+        }
+
+      }
+
+    };
+
+
+  loadApi(
+    'guards',
+    {},
+    callbackName
+  );
 }
 
 
@@ -166,139 +714,186 @@ async function startScanner() {
     return;
   }
 
+
   scanLocked = false;
 
-  setMessage('Memulakan kamera...');
 
-  document.getElementById('startBtn').disabled = true;
+  setScannerMessage(
+    'Memulakan kamera...'
+  );
+
+
+  document.getElementById(
+    'startBtn'
+  ).disabled = true;
+
 
   try {
 
-    if (!window.isSecureContext) {
+    if (
+      !window.isSecureContext
+    ) {
 
-      setMessage(
-        'Scanner mesti dibuka melalui HTTPS.'
+      throw new Error(
+        'HTTPS_REQUIRED'
       );
 
-      document.getElementById('startBtn').disabled = false;
-
-      return;
     }
 
 
-    if (!navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia) {
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ) {
 
-      setMessage(
-        'Browser tidak menyokong akses kamera.'
+      throw new Error(
+        'CAMERA_NOT_SUPPORTED'
       );
 
-      document.getElementById('startBtn').disabled = false;
-
-      return;
     }
 
 
     /*
-     * Test akses kamera dahulu.
-     * Ini membantu iPhone Chrome meminta permission.
+     * Request camera permission.
      */
 
     const stream =
       await navigator.mediaDevices.getUserMedia({
+
         video: {
           facingMode: {
             ideal: 'environment'
           }
         },
+
         audio: false
+
       });
 
 
     /*
-     * Tutup stream sementara.
-     * html5-qrcode akan buka kamera sendiri.
+     * Stop temporary stream.
      */
 
-    stream.getTracks().forEach(function(track) {
-      track.stop();
-    });
+    stream
+      .getTracks()
+      .forEach(
+        function(track) {
+          track.stop();
+        }
+      );
 
 
-    scanner = new Html5Qrcode('reader');
+    scanner =
+      new Html5Qrcode(
+        'reader'
+      );
 
-
-    /*
-     * Dapatkan senarai kamera.
-     */
 
     const cameras =
       await Html5Qrcode.getCameras();
 
 
-    if (!cameras || cameras.length === 0) {
+    if (
+      !cameras ||
+      cameras.length === 0
+    ) {
 
-      setMessage(
-        'Tiada kamera dikesan pada peranti.'
+      throw new Error(
+        'NO_CAMERA'
       );
 
-      document.getElementById('startBtn').disabled = false;
-
-      return;
     }
 
 
     /*
-     * Cari kamera belakang.
+     * Default camera.
      */
 
-    let cameraId = cameras[0].id;
+    let cameraId =
+      cameras[0].id;
 
-    for (let i = 0; i < cameras.length; i++) {
+
+    /*
+     * Try rear camera.
+     */
+
+    for (
+      let i = 0;
+      i < cameras.length;
+      i++
+    ) {
 
       const label =
-        (cameras[i].label || '').toLowerCase();
+        (
+          cameras[i].label || ''
+        ).toLowerCase();
+
 
       if (
         label.includes('back') ||
         label.includes('rear') ||
         label.includes('environment')
       ) {
-        cameraId = cameras[i].id;
+
+        cameraId =
+          cameras[i].id;
+
         break;
+
       }
+
     }
 
 
     /*
-     * Start scanner menggunakan camera ID.
-     * Ini lebih stabil berbanding hanya facingMode
-     * pada sesetengah iPhone.
+     * Start scanner.
      */
 
     await scanner.start(
+
       cameraId,
+
       {
+
         fps: 10,
 
-        qrbox: function(viewfinderWidth, viewfinderHeight) {
+        qrbox:
+          function(
+            width,
+            height
+          ) {
 
-          const minEdge =
-            Math.min(viewfinderWidth, viewfinderHeight);
+            const minEdge =
+              Math.min(
+                width,
+                height
+              );
 
-          const size =
-            Math.min(
-              Math.floor(minEdge * 0.70),
-              300
-            );
 
-          return {
-            width: size,
-            height: size
-          };
-        },
+            const size =
+              Math.min(
+                Math.floor(
+                  minEdge * 0.70
+                ),
+                300
+              );
+
+
+            return {
+
+              width:
+                size,
+
+              height:
+                size
+
+            };
+
+          },
 
         aspectRatio: 1.0
+
       },
 
       function(decodedText) {
@@ -307,86 +902,125 @@ async function startScanner() {
           return;
         }
 
+
         if (!decodedText) {
           return;
         }
 
-        handleQrResult(decodedText);
+
+        handleQrResult(
+          decodedText
+        );
 
       },
 
-      function(errorMessage) {
+      function() {
 
         /*
-         * Ignore QR scan errors.
-         * Kamera masih berjalan.
+         * Ignore scanning errors.
          */
 
       }
+
     );
 
 
     scanning = true;
 
-    document.getElementById('startBtn').disabled = true;
-    document.getElementById('stopBtn').disabled = false;
 
-    setMessage(
+    document.getElementById(
+      'startBtn'
+    ).disabled = true;
+
+
+    document.getElementById(
+      'stopBtn'
+    ).disabled = false;
+
+
+    setScannerMessage(
       'Kamera aktif. Halakan kamera ke QR Visitor Pass.'
     );
 
   }
   catch (error) {
 
-    console.error('Camera error:', error);
+    console.error(
+      'Camera error:',
+      error
+    );
+
 
     scanning = false;
 
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('stopBtn').disabled = true;
+
+    document.getElementById(
+      'startBtn'
+    ).disabled = false;
+
+
+    document.getElementById(
+      'stopBtn'
+    ).disabled = true;
 
 
     let message =
       'Kamera tidak dapat dimulakan.';
 
 
-    if (error && error.name) {
+    if (
+      error.message ===
+      'HTTPS_REQUIRED'
+    ) {
 
-      if (error.name === 'NotAllowedError') {
+      message =
+        'Scanner mesti menggunakan HTTPS.';
 
-        message =
-          'Akses kamera ditolak. Sila benarkan Camera untuk Chrome dalam Settings iPhone.';
+    }
+    else if (
+      error.message ===
+      'CAMERA_NOT_SUPPORTED'
+    ) {
 
-      }
-      else if (error.name === 'NotFoundError') {
+      message =
+        'Browser tidak menyokong akses kamera.';
 
-        message =
-          'Kamera tidak ditemui pada peranti.';
+    }
+    else if (
+      error.message ===
+      'NO_CAMERA'
+    ) {
 
-      }
-      else if (error.name === 'NotReadableError') {
+      message =
+        'Tiada kamera dikesan.';
 
-        message =
-          'Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi tersebut dan cuba lagi.';
+    }
+    else if (
+      error.name ===
+      'NotAllowedError'
+    ) {
 
-      }
-      else if (error.name === 'SecurityError') {
+      message =
+        'Akses kamera ditolak. Sila benarkan Camera untuk Chrome.';
 
-        message =
-          'Akses kamera disekat oleh browser. Pastikan halaman menggunakan HTTPS.';
+    }
+    else if (
+      error.name ===
+      'NotReadableError'
+    ) {
 
-      }
-      else {
-
-        message =
-          'Kamera tidak dapat dimulakan. Sila cuba lagi.';
-      }
+      message =
+        'Kamera sedang digunakan oleh aplikasi lain.';
 
     }
 
 
-    setMessage(message);
+    setScannerMessage(
+      message
+    );
+
   }
+
 }
 
 
@@ -398,12 +1032,24 @@ async function stopScanner() {
 
   scanLocked = true;
 
-  if (!scanner || !scanning) {
 
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('stopBtn').disabled = true;
+  if (
+    !scanner ||
+    !scanning
+  ) {
+
+    document.getElementById(
+      'startBtn'
+    ).disabled = false;
+
+
+    document.getElementById(
+      'stopBtn'
+    ).disabled = true;
+
 
     return;
+
   }
 
 
@@ -414,7 +1060,9 @@ async function stopScanner() {
   }
   catch (error) {
 
-    console.error('Stop camera error:', error);
+    console.error(
+      error
+    );
 
   }
 
@@ -426,21 +1074,32 @@ async function stopScanner() {
   }
   catch (error) {
 
-    console.error('Clear scanner error:', error);
+    console.error(
+      error
+    );
 
   }
 
 
   scanner = null;
+
   scanning = false;
 
 
-  document.getElementById('startBtn').disabled = false;
-  document.getElementById('stopBtn').disabled = true;
+  document.getElementById(
+    'startBtn'
+  ).disabled = false;
 
-  setMessage(
+
+  document.getElementById(
+    'stopBtn'
+  ).disabled = true;
+
+
+  setScannerMessage(
     'Scanner dihentikan.'
   );
+
 }
 
 
@@ -448,70 +1107,684 @@ async function stopScanner() {
    QR RESULT
 ========================================================= */
 
-function handleQrResult(decodedText) {
+function handleQrResult(
+  decodedText
+) {
 
   if (scanLocked) {
     return;
   }
 
+
   scanLocked = true;
 
 
   const visitorId =
-    String(decodedText || '').trim();
+    String(
+      decodedText || ''
+    ).trim();
 
 
   /*
-   * QR kita hanya mengandungi Visitor ID.
-   *
-   * Contoh:
-   * VIS-20261007-ABC12345
+   * QR mesti bermula dengan VIS-
    */
 
-  if (!visitorId.startsWith('VIS-')) {
+  if (
+    !visitorId.startsWith(
+      'VIS-'
+    )
+  ) {
 
     scanLocked = false;
 
-    setMessage(
+
+    setScannerMessage(
       'QR tidak sah. Sila gunakan QR Visitor Pass Alam Idaman.'
     );
 
+
     return;
+
   }
 
 
-  setMessage(
-    'QR berjaya dibaca. Membuka Visitor Management...'
-  );
-
-
   /*
-   * Hentikan kamera dahulu.
+   * Stop camera.
    */
 
   stopScanner();
 
 
   /*
-   * Buka Guard Web App dengan Visitor ID.
+   * Masukkan Visitor ID.
    */
 
-  const url =
-    GUARD_WEB_APP +
-    '?visitorId=' +
-    encodeURIComponent(visitorId);
+  document.getElementById(
+    'visitorIdInput'
+  ).value =
+    visitorId;
 
 
-  setTimeout(function() {
+  /*
+   * Search visitor.
+   */
 
-    window.location.href = url;
+  searchVisitor(
+    visitorId
+  );
 
-  }, 800);
 }
 
 
 /* =========================================================
-   PAGE VISIBILITY
+   SEARCH VISITOR
+========================================================= */
+
+function searchVisitor(
+  visitorId = ''
+) {
+
+  const input =
+    document.getElementById(
+      'visitorIdInput'
+    );
+
+
+  if (!visitorId) {
+
+    visitorId =
+      input.value.trim();
+
+  }
+
+
+  if (!visitorId) {
+
+    showGlobalMessage(
+      'Sila masukkan Visitor ID.',
+      'error'
+    );
+
+
+    return;
+
+  }
+
+
+  visitorId =
+    visitorId.toUpperCase();
+
+
+  input.value =
+    visitorId;
+
+
+  showGlobalMessage(
+    'Mencari Visitor ID...',
+    ''
+  );
+
+
+  const callbackName =
+    'visitorCallback_' +
+    Date.now();
+
+
+  window[callbackName] =
+    function(response) {
+
+      try {
+
+        if (
+          !response ||
+          !response.success
+        ) {
+
+          currentVisitor = null;
+
+
+          document
+            .getElementById(
+              'visitorResult'
+            )
+            .classList.add(
+              'hidden'
+            );
+
+
+          showGlobalMessage(
+            response &&
+            response.message
+              ? response.message
+              : 'Visitor tidak dijumpai.',
+            'error'
+          );
+
+
+          return;
+
+        }
+
+
+        currentVisitor =
+          response.visitor;
+
+
+        displayVisitor(
+          response.visitor
+        );
+
+
+        showGlobalMessage(
+          'Visitor berjaya dijumpai.',
+          'success'
+        );
+
+      }
+      finally {
+
+        delete window[
+          callbackName
+        ];
+
+
+        const script =
+          document.getElementById(
+            callbackName
+          );
+
+
+        if (script) {
+          script.remove();
+        }
+
+      }
+
+    };
+
+
+  loadApi(
+    'visitor',
+
+    {
+      visitorId:
+        visitorId
+    },
+
+    callbackName
+  );
+
+}
+
+
+/* =========================================================
+   DISPLAY VISITOR
+========================================================= */
+
+function displayVisitor(
+  visitor
+) {
+
+  document
+    .getElementById(
+      'visitorResult'
+    )
+    .classList.remove(
+      'hidden'
+    );
+
+
+  document.getElementById(
+    'detailVisitorId'
+  ).textContent =
+    visitor.visitorId || '-';
+
+
+  document.getElementById(
+    'detailUnit'
+  ).textContent =
+    visitor.unit || '-';
+
+
+  document.getElementById(
+    'detailResident'
+  ).textContent =
+    visitor.residentName || '-';
+
+
+  document.getElementById(
+    'detailPhone'
+  ).textContent =
+    visitor.phone || '-';
+
+
+  document.getElementById(
+    'detailVisitorType'
+  ).textContent =
+    visitor.visitorType || '-';
+
+
+  document.getElementById(
+    'detailVisitorName'
+  ).textContent =
+    visitor.visitorName || '-';
+
+
+  document.getElementById(
+    'detailPlate'
+  ).textContent =
+    visitor.plate || '-';
+
+
+  document.getElementById(
+    'detailVehicle'
+  ).textContent =
+    visitor.vehicleType || '-';
+
+
+  document.getElementById(
+    'detailPurpose'
+  ).textContent =
+    visitor.purpose || '-';
+
+
+  document.getElementById(
+    'detailValidFrom'
+  ).textContent =
+    visitor.validFrom || '-';
+
+
+  document.getElementById(
+    'detailValidUntil'
+  ).textContent =
+    visitor.validUntil || '-';
+
+
+  const status =
+    document.getElementById(
+      'visitorStatus'
+    );
+
+
+  status.className =
+    'status';
+
+
+  if (
+    visitor.status ===
+    'EXPIRED'
+  ) {
+
+    status.classList.add(
+      'status-expired'
+    );
+
+
+    status.textContent =
+      'EXPIRED';
+
+  }
+  else {
+
+    status.classList.add(
+      'status-valid'
+    );
+
+
+    status.textContent =
+      'VALID';
+
+  }
+
+
+  /*
+   * Check In controls.
+   */
+
+  const checkInArea =
+    document.getElementById(
+      'checkInArea'
+    );
+
+
+  const alreadyCheckedIn =
+    document.getElementById(
+      'alreadyCheckedIn'
+    );
+
+
+  checkInArea.classList.add(
+    'hidden'
+  );
+
+
+  alreadyCheckedIn.classList.add(
+    'hidden'
+  );
+
+
+  if (
+    visitor.status ===
+    'EXPIRED'
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    visitor.checkedIn
+  ) {
+
+    alreadyCheckedIn.classList.remove(
+      'hidden'
+    );
+
+  }
+  else {
+
+    checkInArea.classList.remove(
+      'hidden'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   CHECK IN
+========================================================= */
+
+function checkInVisitor() {
+
+  if (!currentVisitor) {
+
+    showGlobalMessage(
+      'Tiada Visitor dipilih.',
+      'error'
+    );
+
+
+    return;
+
+  }
+
+
+  const guard =
+    document.getElementById(
+      'guardName'
+    ).value;
+
+
+  if (!guard) {
+
+    showGlobalMessage(
+      'Sila pilih nama Guard terlebih dahulu.',
+      'error'
+    );
+
+
+    return;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      'checkInBtn'
+    );
+
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    'PROCESSING...';
+
+
+  const callbackName =
+    'checkInCallback_' +
+    Date.now();
+
+
+  window[callbackName] =
+    function(response) {
+
+      try {
+
+        if (
+          response &&
+          response.success
+        ) {
+
+          currentVisitor.checkedIn =
+            true;
+
+
+          displayVisitor(
+            currentVisitor
+          );
+
+
+          showGlobalMessage(
+            '✓ Pelawat berjaya CHECK IN. Guard: ' +
+            guard,
+            'success'
+          );
+
+        }
+        else {
+
+          showGlobalMessage(
+            response &&
+            response.message
+              ? response.message
+              : 'CHECK IN gagal.',
+            'error'
+          );
+
+        }
+
+      }
+      finally {
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          'CHECK IN';
+
+
+        delete window[
+          callbackName
+        ];
+
+
+        const script =
+          document.getElementById(
+            callbackName
+          );
+
+
+        if (script) {
+          script.remove();
+        }
+
+      }
+
+    };
+
+
+  loadApi(
+    'checkin',
+
+    {
+      visitorId:
+        currentVisitor.visitorId,
+
+      guardName:
+        guard
+    },
+
+    callbackName
+  );
+
+}
+
+
+/* =========================================================
+   API JSONP
+========================================================= */
+
+function loadApi(
+  api,
+  params,
+  callbackName
+) {
+
+  const query =
+    new URLSearchParams();
+
+
+  query.set(
+    'api',
+    api
+  );
+
+
+  query.set(
+    'callback',
+    callbackName
+  );
+
+
+  Object.keys(params)
+    .forEach(
+      function(key) {
+
+        query.set(
+          key,
+          params[key]
+        );
+
+      }
+    );
+
+
+  const script =
+    document.createElement(
+      'script'
+    );
+
+
+  script.id =
+    callbackName;
+
+
+  script.src =
+    API_URL +
+    '?' +
+    query.toString();
+
+
+  script.onerror =
+    function() {
+
+      showGlobalMessage(
+        'Tidak dapat berhubung dengan server.',
+        'error'
+      );
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+function setScannerMessage(
+  message
+) {
+
+  document.getElementById(
+    'scannerMessage'
+  ).textContent =
+    message;
+
+}
+
+
+function showGlobalMessage(
+  message,
+  type
+) {
+
+  const element =
+    document.getElementById(
+      'globalMessage'
+    );
+
+
+  element.textContent =
+    message;
+
+
+  element.className =
+    'message';
+
+
+  if (
+    type ===
+    'success'
+  ) {
+
+    element.classList.add(
+      'success'
+    );
+
+  }
+  else if (
+    type ===
+    'error'
+  ) {
+
+    element.classList.add(
+      'error'
+    );
+
+  }
+  else if (
+    type ===
+    'warning'
+  ) {
+
+    element.classList.add(
+      'warning'
+    );
+
+  }
+
+
+  element.classList.remove(
+    'hidden'
+  );
+
+}
+
+
+/* =========================================================
+   VISIBILITY
 ========================================================= */
 
 document.addEventListener(
@@ -524,12 +1797,15 @@ document.addEventListener(
     ) {
 
       stopScanner();
+
     }
 
   }
 );
 
+
 </script>
 
 </body>
+
 </html>
