@@ -1658,22 +1658,20 @@ function loadApi(
     callbackName
   );
 
-  Object.keys(params || {})
-    .forEach(
-      function(key) {
-
-        query.set(
-          key,
-          params[key]
-        );
-
-      }
-    );
-
   query.set(
     '_',
     Date.now()
   );
+
+  Object.keys(params || {})
+    .forEach(function(key) {
+
+      query.set(
+        key,
+        params[key]
+      );
+
+    });
 
   const script =
     document.createElement(
@@ -1690,30 +1688,9 @@ function loadApi(
 
   script.async = true;
 
-  script.onerror =
-    function() {
-
-      showGlobalMessage(
-        'Tidak dapat berhubung dengan server.',
-        'error'
-      );
-
-      if (window[callbackName]) {
-        delete window[callbackName];
-      }
-
-      if (script.parentNode) {
-        script.parentNode.removeChild(
-          script
-        );
-      }
-
-    };
-
   document.body.appendChild(
     script
   );
-
 }
 
 
