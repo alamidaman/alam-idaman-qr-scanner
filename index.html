@@ -620,7 +620,10 @@ function loadGuards() {
 
       try {
 
-        console.log('Guard API response:', response);
+        console.log(
+          'Guard API response:',
+          response
+        );
 
         if (
           !response ||
@@ -628,46 +631,66 @@ function loadGuards() {
         ) {
 
           showGlobalMessage(
-            response && response.message
+            response &&
+            response.message
               ? response.message
               : 'Senarai Guard tidak dapat dimuatkan.',
             'error'
           );
 
           return;
+
         }
 
+
         const select =
-          document.getElementById('guardName');
+          document.getElementById(
+            'guardName'
+          );
+
 
         if (!select) {
           return;
         }
 
+
         select.innerHTML =
           '<option value="">-- Pilih Guard --</option>';
 
+
         const guards =
-          Array.isArray(response.guards)
+          Array.isArray(
+            response.guards
+          )
             ? response.guards
             : [];
 
-        guards.forEach(function(guard) {
 
-          const option =
-            document.createElement('option');
+        guards.forEach(
+          function(guard) {
 
-          option.value =
-            guard;
+            const option =
+              document.createElement(
+                'option'
+              );
 
-          option.textContent =
-            guard;
+            option.value =
+              guard;
 
-          select.appendChild(option);
+            option.textContent =
+              guard;
 
-        });
+            select.appendChild(
+              option
+            );
 
-        if (guards.length === 0) {
+          }
+        );
+
+
+        if (
+          guards.length === 0
+        ) {
 
           showGlobalMessage(
             'Tiada Guard dijumpai dalam sheet Guard.',
@@ -679,12 +702,16 @@ function loadGuards() {
       }
       finally {
 
-        delete window[callbackName];
+        delete window[
+          callbackName
+        ];
+
 
         const script =
           document.getElementById(
             callbackName
           );
+
 
         if (script) {
           script.remove();
@@ -693,6 +720,7 @@ function loadGuards() {
       }
 
     };
+
 
   loadApi(
     'guards',
@@ -825,7 +853,8 @@ async function startScanner() {
 
       const label =
         (
-          cameras[i].label || ''
+          cameras[i].label ||
+          ''
         ).toLowerCase();
 
 
@@ -895,6 +924,7 @@ async function startScanner() {
 
       },
 
+
       function(decodedText) {
 
         if (scanLocked) {
@@ -912,6 +942,7 @@ async function startScanner() {
         );
 
       },
+
 
       function() {
 
@@ -1274,6 +1305,14 @@ function searchVisitor(
         );
 
 
+        /*
+         * Rekod setiap scan selepas
+         * visitor berjaya dijumpai.
+         */
+
+        recordScan();
+
+
         showGlobalMessage(
           'Visitor berjaya dijumpai.',
           'success'
@@ -1304,12 +1343,10 @@ function searchVisitor(
 
   loadApi(
     'visitor',
-
     {
       visitorId:
         visitorId
     },
-
     callbackName
   );
 
@@ -1360,7 +1397,9 @@ function displayVisitor(
   document.getElementById(
     'detailVisitorType'
   ).textContent =
-    visitor.actualVisitorType || visitor.visitorType || '-';
+    visitor.actualVisitorType ||
+    visitor.visitorType ||
+    '-';
 
 
   document.getElementById(
@@ -1493,6 +1532,110 @@ function displayVisitor(
 
 
 /* =========================================================
+   RECORD SCAN
+========================================================= */
+
+function recordScan() {
+
+  if (!currentVisitor) {
+    return;
+  }
+
+
+  const guard =
+    document.getElementById(
+      'guardName'
+    ).value;
+
+
+  if (!guard) {
+
+    showGlobalMessage(
+      'Sila pilih nama Guard terlebih dahulu sebelum scan.',
+      'warning'
+    );
+
+    return;
+
+  }
+
+
+  const callbackName =
+    'scanCallback_' +
+    Date.now();
+
+
+  window[callbackName] =
+    function(response) {
+
+      try {
+
+        console.log(
+          'Scan Log response:',
+          response
+        );
+
+
+        if (
+          response &&
+          response.success
+        ) {
+
+          console.log(
+            'SCAN berjaya direkodkan.'
+          );
+
+        }
+        else {
+
+          console.warn(
+            response &&
+            response.message
+              ? response.message
+              : 'SCAN tidak direkodkan.'
+          );
+
+        }
+
+      }
+      finally {
+
+        delete window[
+          callbackName
+        ];
+
+
+        const script =
+          document.getElementById(
+            callbackName
+          );
+
+
+        if (script) {
+          script.remove();
+        }
+
+      }
+
+    };
+
+
+  loadApi(
+    'scan',
+    {
+      visitorId:
+        currentVisitor.visitorId,
+
+      guardName:
+        guard
+    },
+    callbackName
+  );
+
+}
+
+
+/* =========================================================
    CHECK IN
 ========================================================= */
 
@@ -1620,7 +1763,6 @@ function checkInVisitor() {
 
   loadApi(
     'checkin',
-
     {
       visitorId:
         currentVisitor.visitorId,
@@ -1628,7 +1770,6 @@ function checkInVisitor() {
       guardName:
         guard
     },
-
     callbackName
   );
 
@@ -1648,49 +1789,96 @@ function loadApi(
   const query =
     new URLSearchParams();
 
+
   query.set(
     'api',
     api
   );
+
 
   query.set(
     'callback',
     callbackName
   );
 
+
   query.set(
     '_',
     Date.now()
   );
 
-  Object.keys(params || {})
-    .forEach(function(key) {
 
-      query.set(
-        key,
-        params[key]
-      );
+  Object.keys(
+    params || {}
+  )
+    .forEach(
+      function(key) {
 
-    });
+        query.set(
+          key,
+          params[key]
+        );
+
+      }
+    );
+
 
   const script =
     document.createElement(
       'script'
     );
 
+
   script.id =
     callbackName;
+
 
   script.src =
     API_URL +
     '?' +
     query.toString();
 
+
   script.async = true;
+
+
+  script.onerror =
+    function() {
+
+      console.error(
+        'API request failed:',
+        api
+      );
+
+
+      if (
+        window[callbackName]
+      ) {
+
+        delete window[
+          callbackName
+        ];
+
+      }
+
+
+      if (
+        script.parentNode
+      ) {
+
+        script.parentNode.removeChild(
+          script
+        );
+
+      }
+
+    };
+
 
   document.body.appendChild(
     script
   );
+
 }
 
 
