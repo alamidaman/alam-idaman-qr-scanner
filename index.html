@@ -692,191 +692,6 @@ function loadGuards() {
     };
 
 
-  function loadApi(
-  api,
-  params,
-  callbackName
-) {
-
-  const query =
-    new URLSearchParams();
-
-  query.set(
-    'api',
-    api
-  );
-
-  query.set(
-    'callback',
-    callbackName
-  );
-
-  Object.keys(params || {})
-    .forEach(
-      function(key) {
-
-        query.set(
-          key,
-          params[key]
-        );
-
-      }
-    );
-
-  query.set(
-    '_',
-    Date.now()
-  );
-
-  const script =
-    document.createElement(
-      'script'
-    );
-
-  script.id =
-    callbackName;
-
-  script.src =
-    API_URL +
-    '?' +
-    query.toString();
-
-  script.async = true;
-
-  let completed = false;
-
-  const timeout =
-    setTimeout(
-      function() {
-
-        if (completed) {
-          return;
-        }
-
-        completed = true;
-
-        showGlobalMessage(
-          'Server mengambil masa terlalu lama untuk memberi respons.',
-          'error'
-        );
-
-        if (window[callbackName]) {
-          delete window[callbackName];
-        }
-
-        if (script.parentNode) {
-          script.parentNode.removeChild(
-            script
-          );
-        }
-
-      },
-      15000
-    );
-
-  script.onload =
-    function() {
-
-      /*
-       * Jangan terus anggap berjaya.
-       * Callback JSONP akan mengendalikan response.
-       */
-
-      setTimeout(
-        function() {
-
-          if (
-            !completed &&
-            typeof window[callbackName] ===
-            'function'
-          ) {
-
-            /*
-             * Callback belum dipanggil.
-             * Tunggu timeout.
-             */
-
-            return;
-          }
-
-        },
-        100
-      );
-
-    };
-
-  script.onerror =
-    function() {
-
-      if (completed) {
-        return;
-      }
-
-      completed = true;
-
-      clearTimeout(timeout);
-
-      showGlobalMessage(
-        'Tidak dapat berhubung dengan server.',
-        'error'
-      );
-
-      if (window[callbackName]) {
-        delete window[callbackName];
-      }
-
-      if (script.parentNode) {
-        script.parentNode.removeChild(
-          script
-        );
-      }
-
-    };
-
-  /*
-   * Wrap callback supaya timeout
-   * dihentikan apabila API berjaya.
-   */
-
-  const originalCallback =
-    window[callbackName];
-
-  window[callbackName] =
-    function(response) {
-
-      if (completed) {
-        return;
-      }
-
-      completed = true;
-
-      clearTimeout(timeout);
-
-      try {
-
-        if (originalCallback) {
-          originalCallback(response);
-        }
-
-      }
-      finally {
-
-        delete window[callbackName];
-
-        if (script.parentNode) {
-          script.parentNode.removeChild(
-            script
-          );
-        }
-
-      }
-
-    };
-
-  document.body.appendChild(
-    script
-  );
-}
 
 
 /* =========================================================
@@ -1536,7 +1351,7 @@ function displayVisitor(
   document.getElementById(
     'detailVisitorType'
   ).textContent =
-    visitor.visitorType || '-';
+    visitor.actualVisitorType || visitor.visitorType || '-';
 
 
   document.getElementById(
@@ -1824,20 +1639,17 @@ function loadApi(
   const query =
     new URLSearchParams();
 
-
   query.set(
     'api',
     api
   );
-
 
   query.set(
     'callback',
     callbackName
   );
 
-
-  Object.keys(params)
+  Object.keys(params || {})
     .forEach(
       function(key) {
 
@@ -1849,22 +1661,25 @@ function loadApi(
       }
     );
 
+  query.set(
+    '_',
+    Date.now()
+  );
 
   const script =
     document.createElement(
       'script'
     );
 
-
   script.id =
     callbackName;
-
 
   script.src =
     API_URL +
     '?' +
     query.toString();
 
+  script.async = true;
 
   script.onerror =
     function() {
@@ -1874,8 +1689,17 @@ function loadApi(
         'error'
       );
 
-    };
+      if (window[callbackName]) {
+        delete window[callbackName];
+      }
 
+      if (script.parentNode) {
+        script.parentNode.removeChild(
+          script
+        );
+      }
+
+    };
 
   document.body.appendChild(
     script
