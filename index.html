@@ -615,11 +615,12 @@ function loadGuards() {
     'guardCallback_' +
     Date.now();
 
-
   window[callbackName] =
     function(response) {
 
       try {
+
+        console.log('Guard API response:', response);
 
         if (
           !response ||
@@ -627,61 +628,63 @@ function loadGuards() {
         ) {
 
           showGlobalMessage(
-            'Senarai Guard tidak dapat dimuatkan.',
+            response && response.message
+              ? response.message
+              : 'Senarai Guard tidak dapat dimuatkan.',
             'error'
           );
 
           return;
         }
 
-
         const select =
-          document.getElementById(
-            'guardName'
-          );
+          document.getElementById('guardName');
 
+        if (!select) {
+          return;
+        }
 
         select.innerHTML =
           '<option value="">-- Pilih Guard --</option>';
 
+        const guards =
+          Array.isArray(response.guards)
+            ? response.guards
+            : [];
 
-        response.guards.forEach(
-          function(guard) {
+        guards.forEach(function(guard) {
 
-            const option =
-              document.createElement(
-                'option'
-              );
+          const option =
+            document.createElement('option');
 
+          option.value =
+            guard;
 
-            option.value =
-              guard;
+          option.textContent =
+            guard;
 
+          select.appendChild(option);
 
-            option.textContent =
-              guard;
+        });
 
+        if (guards.length === 0) {
 
-            select.appendChild(
-              option
-            );
+          showGlobalMessage(
+            'Tiada Guard dijumpai dalam sheet Guard.',
+            'warning'
+          );
 
-          }
-        );
+        }
 
       }
       finally {
 
-        delete window[
-          callbackName
-        ];
-
+        delete window[callbackName];
 
         const script =
           document.getElementById(
             callbackName
           );
-
 
         if (script) {
           script.remove();
@@ -691,97 +694,11 @@ function loadGuards() {
 
     };
 
-
-  function loadApi(
-  api,
-  params,
-  callbackName
-) {
-
-  const query =
-    new URLSearchParams();
-
-  query.set(
-    'api',
-    api
-  );
-
-  query.set(
-    'callback',
+  loadApi(
+    'guards',
+    {},
     callbackName
   );
-
-  Object.keys(params || {})
-    .forEach(
-      function(key) {
-
-        query.set(
-          key,
-          params[key]
-        );
-
-      }
-    );
-
-  query.set(
-    '_',
-    Date.now()
-  );
-
-  const script =
-    document.createElement(
-      'script'
-    );
-
-  script.id =
-    callbackName;
-
-  script.src =
-    API_URL +
-    '?' +
-    query.toString();
-
-  script.async = true;
-
-  document.body.appendChild(
-    script
-  );
-
-  /*
-   * Timeout sahaja.
-   * Jangan gunakan script.onerror kerana
-   * Apps Script boleh melalui redirect sebelum
-   * JSONP response diterima.
-   */
-
-  setTimeout(
-    function() {
-
-      if (
-        window[callbackName]
-      ) {
-
-        showGlobalMessage(
-          'Server tidak memberi respons.',
-          'error'
-        );
-
-        delete window[
-          callbackName
-        ];
-
-        if (script.parentNode) {
-          script.parentNode.removeChild(
-            script
-          );
-        }
-
-      }
-
-    },
-    15000
-  );
-}
 
 }
 
