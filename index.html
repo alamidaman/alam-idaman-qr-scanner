@@ -692,11 +692,96 @@ function loadGuards() {
     };
 
 
-  loadApi(
-    'guards',
-    {},
+  function loadApi(
+  api,
+  params,
+  callbackName
+) {
+
+  const query =
+    new URLSearchParams();
+
+  query.set(
+    'api',
+    api
+  );
+
+  query.set(
+    'callback',
     callbackName
   );
+
+  Object.keys(params || {})
+    .forEach(
+      function(key) {
+
+        query.set(
+          key,
+          params[key]
+        );
+
+      }
+    );
+
+  query.set(
+    '_',
+    Date.now()
+  );
+
+  const script =
+    document.createElement(
+      'script'
+    );
+
+  script.id =
+    callbackName;
+
+  script.src =
+    API_URL +
+    '?' +
+    query.toString();
+
+  script.async = true;
+
+  document.body.appendChild(
+    script
+  );
+
+  /*
+   * Timeout sahaja.
+   * Jangan gunakan script.onerror kerana
+   * Apps Script boleh melalui redirect sebelum
+   * JSONP response diterima.
+   */
+
+  setTimeout(
+    function() {
+
+      if (
+        window[callbackName]
+      ) {
+
+        showGlobalMessage(
+          'Server tidak memberi respons.',
+          'error'
+        );
+
+        delete window[
+          callbackName
+        ];
+
+        if (script.parentNode) {
+          script.parentNode.removeChild(
+            script
+          );
+        }
+
+      }
+
+    },
+    15000
+  );
+}
 
 }
 
