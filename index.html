@@ -2,13 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
 
   <title>Alam Idaman QR Scanner</title>
 
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       padding: 20px;
@@ -18,46 +25,75 @@
     }
 
     .container {
+      width: 100%;
       max-width: 500px;
-      margin: auto;
+      margin: 0 auto;
       background: #fff;
       padding: 20px;
       border-radius: 14px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
 
     h2 {
       text-align: center;
-      margin-top: 0;
+      margin: 0 0 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin: 0 0 20px;
+      color: #666;
+      font-size: 15px;
     }
 
     #reader {
       width: 100%;
-      margin-top: 20px;
+      min-height: 280px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #111;
+    }
+
+    #reader video {
+      width: 100% !important;
+      height: auto !important;
+      border-radius: 12px;
     }
 
     .message {
       margin-top: 15px;
-      padding: 12px;
+      padding: 13px;
       border-radius: 8px;
       text-align: center;
       background: #f0f0f0;
+      font-size: 14px;
+      line-height: 1.4;
     }
 
     button {
       width: 100%;
       padding: 14px;
-      margin-top: 15px;
+      margin-top: 12px;
       border: 0;
       border-radius: 8px;
       background: #1a73e8;
-      color: white;
+      color: #fff;
       font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
     }
 
     button:disabled {
       background: #aaa;
+      cursor: not-allowed;
+    }
+
+    .note {
+      margin-top: 15px;
+      text-align: center;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -68,140 +104,373 @@
 
   <h2>Alam Idaman</h2>
 
-  <p style="text-align:center;">
+  <div class="subtitle">
     <strong>Guard QR Scanner</strong>
-  </p>
+  </div>
 
   <div id="reader"></div>
 
   <div id="message" class="message">
-    Sedia untuk scan QR Visitor Pass.
+    Tekan START CAMERA untuk mula scan.
   </div>
 
-  <button id="startBtn" onclick="startScanner()">
+  <button
+    id="startBtn"
+    type="button"
+    onclick="startScanner()"
+  >
     START CAMERA
   </button>
 
-  <button id="stopBtn" onclick="stopScanner()" disabled>
+  <button
+    id="stopBtn"
+    type="button"
+    onclick="stopScanner()"
+    disabled
+  >
     STOP CAMERA
   </button>
+
+  <div class="note">
+    Pastikan akses kamera Chrome telah dibenarkan.
+  </div>
 
 </div>
 
 <script>
 
 const GUARD_WEB_APP =
-  'https://script.google.com/macros/s/AKfycbwIXzL_IzCqDHdYOOPEQHdvCzGhPRAVsr2XZBku-4ckXI0tBvYNsoeVw2CPcyK_kBPy1Q/exec';
+  'https://script.google.com/macros/s/AKfycbwIXzL_IzCqDHdYOOPEQHdvCzGhPRAVsr2XZBku-4ckXI0tBvYNsoeW2CPcyK_kBPy1Q/exec';
 
 let scanner = null;
 let scanning = false;
+let scanLocked = false;
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
 
 function setMessage(message) {
   document.getElementById('message').textContent = message;
 }
 
-function startScanner() {
+
+/* =========================================================
+   START CAMERA
+========================================================= */
+
+async function startScanner() {
 
   if (scanning) {
     return;
   }
 
-  scanner = new Html5Qrcode('reader');
+  scanLocked = false;
 
   setMessage('Memulakan kamera...');
 
-  scanner.start(
-    {
-      facingMode: {
-        ideal: 'environment'
-      }
-    },
-    {
-      fps: 10,
-      qrbox: {
-        width: 250,
-        height: 250
-      }
-    },
-    function(decodedText) {
+  document.getElementById('startBtn').disabled = true;
 
-      if (!decodedText) {
-        return;
-      }
+  try {
 
-      handleQrResult(decodedText);
+    if (!window.isSecureContext) {
 
-    },
-    function(errorMessage) {
-      // Ignore scan errors while camera is searching.
+      setMessage(
+        'Scanner mesti dibuka melalui HTTPS.'
+      );
+
+      document.getElementById('startBtn').disabled = false;
+
+      return;
     }
-  )
-  .then(function() {
+
+
+    if (!navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia) {
+
+      setMessage(
+        'Browser tidak menyokong akses kamera.'
+      );
+
+      document.getElementById('startBtn').disabled = false;
+
+      return;
+    }
+
+
+    /*
+     * Test akses kamera dahulu.
+     * Ini membantu iPhone Chrome meminta permission.
+     */
+
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: {
+            ideal: 'environment'
+          }
+        },
+        audio: false
+      });
+
+
+    /*
+     * Tutup stream sementara.
+     * html5-qrcode akan buka kamera sendiri.
+     */
+
+    stream.getTracks().forEach(function(track) {
+      track.stop();
+    });
+
+
+    scanner = new Html5Qrcode('reader');
+
+
+    /*
+     * Dapatkan senarai kamera.
+     */
+
+    const cameras =
+      await Html5Qrcode.getCameras();
+
+
+    if (!cameras || cameras.length === 0) {
+
+      setMessage(
+        'Tiada kamera dikesan pada peranti.'
+      );
+
+      document.getElementById('startBtn').disabled = false;
+
+      return;
+    }
+
+
+    /*
+     * Cari kamera belakang.
+     */
+
+    let cameraId = cameras[0].id;
+
+    for (let i = 0; i < cameras.length; i++) {
+
+      const label =
+        (cameras[i].label || '').toLowerCase();
+
+      if (
+        label.includes('back') ||
+        label.includes('rear') ||
+        label.includes('environment')
+      ) {
+        cameraId = cameras[i].id;
+        break;
+      }
+    }
+
+
+    /*
+     * Start scanner menggunakan camera ID.
+     * Ini lebih stabil berbanding hanya facingMode
+     * pada sesetengah iPhone.
+     */
+
+    await scanner.start(
+      cameraId,
+      {
+        fps: 10,
+
+        qrbox: function(viewfinderWidth, viewfinderHeight) {
+
+          const minEdge =
+            Math.min(viewfinderWidth, viewfinderHeight);
+
+          const size =
+            Math.min(
+              Math.floor(minEdge * 0.70),
+              300
+            );
+
+          return {
+            width: size,
+            height: size
+          };
+        },
+
+        aspectRatio: 1.0
+      },
+
+      function(decodedText) {
+
+        if (scanLocked) {
+          return;
+        }
+
+        if (!decodedText) {
+          return;
+        }
+
+        handleQrResult(decodedText);
+
+      },
+
+      function(errorMessage) {
+
+        /*
+         * Ignore QR scan errors.
+         * Kamera masih berjalan.
+         */
+
+      }
+    );
+
 
     scanning = true;
 
     document.getElementById('startBtn').disabled = true;
     document.getElementById('stopBtn').disabled = false;
 
-    setMessage('Kamera aktif. Halakan kamera ke QR Visitor Pass.');
-
-  })
-  .catch(function(error) {
-
-    console.error(error);
-
     setMessage(
-      'Kamera tidak dapat dimulakan. Sila benarkan akses kamera.'
+      'Kamera aktif. Halakan kamera ke QR Visitor Pass.'
     );
+
+  }
+  catch (error) {
+
+    console.error('Camera error:', error);
 
     scanning = false;
 
-  });
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+
+
+    let message =
+      'Kamera tidak dapat dimulakan.';
+
+
+    if (error && error.name) {
+
+      if (error.name === 'NotAllowedError') {
+
+        message =
+          'Akses kamera ditolak. Sila benarkan Camera untuk Chrome dalam Settings iPhone.';
+
+      }
+      else if (error.name === 'NotFoundError') {
+
+        message =
+          'Kamera tidak ditemui pada peranti.';
+
+      }
+      else if (error.name === 'NotReadableError') {
+
+        message =
+          'Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi tersebut dan cuba lagi.';
+
+      }
+      else if (error.name === 'SecurityError') {
+
+        message =
+          'Akses kamera disekat oleh browser. Pastikan halaman menggunakan HTTPS.';
+
+      }
+      else {
+
+        message =
+          'Kamera tidak dapat dimulakan. Sila cuba lagi.';
+      }
+
+    }
+
+
+    setMessage(message);
+  }
 }
 
-function stopScanner() {
+
+/* =========================================================
+   STOP CAMERA
+========================================================= */
+
+async function stopScanner() {
+
+  scanLocked = true;
 
   if (!scanner || !scanning) {
+
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+
     return;
   }
 
-  scanner.stop()
-    .then(function() {
 
-      scanner.clear();
+  try {
 
-      scanning = false;
+    await scanner.stop();
 
-      document.getElementById('startBtn').disabled = false;
-      document.getElementById('stopBtn').disabled = true;
+  }
+  catch (error) {
 
-      setMessage('Scanner dihentikan.');
+    console.error('Stop camera error:', error);
 
-    })
-    .catch(function(error) {
+  }
 
-      console.error(error);
 
-      scanning = false;
+  try {
 
-      document.getElementById('startBtn').disabled = false;
-      document.getElementById('stopBtn').disabled = true;
+    scanner.clear();
 
-    });
+  }
+  catch (error) {
+
+    console.error('Clear scanner error:', error);
+
+  }
+
+
+  scanner = null;
+  scanning = false;
+
+
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+
+  setMessage(
+    'Scanner dihentikan.'
+  );
 }
+
+
+/* =========================================================
+   QR RESULT
+========================================================= */
 
 function handleQrResult(decodedText) {
 
-  let visitorId = decodedText.trim();
+  if (scanLocked) {
+    return;
+  }
+
+  scanLocked = true;
+
+
+  const visitorId =
+    String(decodedText || '').trim();
+
 
   /*
-   * QR kita sekarang hanya mengandungi Visitor ID.
+   * QR kita hanya mengandungi Visitor ID.
    *
    * Contoh:
    * VIS-20261007-ABC12345
    */
 
   if (!visitorId.startsWith('VIS-')) {
+
+    scanLocked = false;
 
     setMessage(
       'QR tidak sah. Sila gunakan QR Visitor Pass Alam Idaman.'
@@ -210,23 +479,55 @@ function handleQrResult(decodedText) {
     return;
   }
 
+
   setMessage(
     'QR berjaya dibaca. Membuka Visitor Management...'
   );
 
+
+  /*
+   * Hentikan kamera dahulu.
+   */
+
   stopScanner();
+
+
+  /*
+   * Buka Guard Web App dengan Visitor ID.
+   */
 
   const url =
     GUARD_WEB_APP +
     '?visitorId=' +
     encodeURIComponent(visitorId);
 
+
   setTimeout(function() {
 
     window.location.href = url;
 
-  }, 500);
+  }, 800);
 }
+
+
+/* =========================================================
+   PAGE VISIBILITY
+========================================================= */
+
+document.addEventListener(
+  'visibilitychange',
+  function() {
+
+    if (
+      document.hidden &&
+      scanning
+    ) {
+
+      stopScanner();
+    }
+
+  }
+);
 
 </script>
 
