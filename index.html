@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Alam Idaman QR Scanner</title>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f6f8;
+      color: #222;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    #reader {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      background: #f0f0f0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border: 0;
+      border-radius: 8px;
+      background: #1a73e8;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>Alam Idaman</h2>
+
+  <p style="text-align:center;">
+    <strong>Guard QR Scanner</strong>
+  </p>
+
+  <div id="reader"></div>
+
+  <div id="message" class="message">
+    Sedia untuk scan QR Visitor Pass.
+  </div>
+
+  <button id="startBtn" onclick="startScanner()">
+    START CAMERA
+  </button>
+
+  <button id="stopBtn" onclick="stopScanner()" disabled>
+    STOP CAMERA
+  </button>
+
+</div>
+
+<script>
+
+const GUARD_WEB_APP =
+  'https://script.google.com/macros/s/AKfycbwIXzL_IzCqDHdYOOPEQHdvCzGhPRAVsr2XZBku-4ckXI0tBvYNsoeVw2CPcyK_kBPy1Q/exec';
+
+let scanner = null;
+let scanning = false;
+
+function setMessage(message) {
+  document.getElementById('message').textContent = message;
+}
+
+function startScanner() {
+
+  if (scanning) {
+    return;
+  }
+
+  scanner = new Html5Qrcode('reader');
+
+  setMessage('Memulakan kamera...');
+
+  scanner.start(
+    {
+      facingMode: {
+        ideal: 'environment'
+      }
+    },
+    {
+      fps: 10,
+      qrbox: {
+        width: 250,
+        height: 250
+      }
+    },
+    function(decodedText) {
+
+      if (!decodedText) {
+        return;
+      }
+
+      handleQrResult(decodedText);
+
+    },
+    function(errorMessage) {
+      // Ignore scan errors while camera is searching.
+    }
+  )
+  .then(function() {
+
+    scanning = true;
+
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+
+    setMessage('Kamera aktif. Halakan kamera ke QR Visitor Pass.');
+
+  })
+  .catch(function(error) {
+
+    console.error(error);
+
+    setMessage(
+      'Kamera tidak dapat dimulakan. Sila benarkan akses kamera.'
+    );
+
+    scanning = false;
+
+  });
+}
+
+function stopScanner() {
+
+  if (!scanner || !scanning) {
+    return;
+  }
+
+  scanner.stop()
+    .then(function() {
+
+      scanner.clear();
+
+      scanning = false;
+
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+
+      setMessage('Scanner dihentikan.');
+
+    })
+    .catch(function(error) {
+
+      console.error(error);
+
+      scanning = false;
+
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+
+    });
+}
+
+function handleQrResult(decodedText) {
+
+  let visitorId = decodedText.trim();
+
+  /*
+   * QR kita sekarang hanya mengandungi Visitor ID.
+   *
+   * Contoh:
+   * VIS-20261007-ABC12345
+   */
+
+  if (!visitorId.startsWith('VIS-')) {
+
+    setMessage(
+      'QR tidak sah. Sila gunakan QR Visitor Pass Alam Idaman.'
+    );
+
+    return;
+  }
+
+  setMessage(
+    'QR berjaya dibaca. Membuka Visitor Management...'
+  );
+
+  stopScanner();
+
+  const url =
+    GUARD_WEB_APP +
+    '?visitorId=' +
+    encodeURIComponent(visitorId);
+
+  setTimeout(function() {
+
+    window.location.href = url;
+
+  }, 500);
+}
+
+</script>
+
+</body>
+</html>
