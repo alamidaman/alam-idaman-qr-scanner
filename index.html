@@ -741,7 +741,12 @@ async function startScanner() {
     return;
   }
 
-
+  /*
+   * Hide previous visitor information
+   * before starting a new scan.
+   */
+  resetVisitorInformation();
+  
   scanLocked = false;
 
 
@@ -1132,7 +1137,36 @@ async function stopScanner() {
 
 }
 
+/* =========================================================
+   RESET VISITOR INFORMATION
+========================================================= */
 
+function resetVisitorInformation() {
+
+  currentVisitor = null;
+
+  document
+    .getElementById('visitorResult')
+    .classList.add('hidden');
+
+  document
+    .getElementById('visitorStatus')
+    .textContent = '-';
+
+  document
+    .getElementById('alreadyCheckedIn')
+    .classList.add('hidden');
+
+  document
+    .getElementById('checkInArea')
+    .classList.add('hidden');
+
+  document
+    .getElementById('visitorIdInput')
+    .value = '';
+
+}
+  
 /* =========================================================
    QR RESULT
 ========================================================= */
