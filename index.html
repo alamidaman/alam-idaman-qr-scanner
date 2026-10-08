@@ -609,10 +609,24 @@
 				displayVisitor(response.visitor);
 				recordScan();
 	
-				showGlobalMessage(
-					'Visitor berjaya dijumpai.',
-					'success'
-				);
+				if (response.visitor.status === 'REJECTED') {
+					showGlobalMessage(
+						'Pelawat ini tidak dibenarkan masuk oleh tuan rumah. Sila hubungi tuan rumah untuk maklumat lanjut.',
+						'error'
+					);
+				}
+				else if (response.visitor.status === 'EXPIRED') {
+					showGlobalMessage(
+						'QR Code ini telah tamat tempoh. Sila minta tuan rumah membuat pendaftaran pelawat baharu.',
+						'warning'
+					);
+				}
+				else {
+					showGlobalMessage(
+						'Visitor berjaya dijumpai.',
+						'success'
+					);
+				}
 			}
 			finally {
 				delete window[callbackName];
