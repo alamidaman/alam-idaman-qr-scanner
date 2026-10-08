@@ -5,7 +5,10 @@
 
   <meta charset="UTF-8">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
 
   <title>Alam Idaman Guard</title>
 
@@ -206,9 +209,12 @@
 
 </head>
 
+
 <body>
 
+
 <div class="container">
+
 
   <!-- =====================================================
        HEADER
@@ -216,11 +222,18 @@
 
   <div class="card header">
 
-    <img src="logo.png" alt="Alam Idaman" class="logo">
+    <img
+      src="logo.png"
+      alt="Alam Idaman"
+      class="logo"
+    >
 
-    <div class="subtitle">Guard Visitor Management</div>
+    <div class="subtitle">
+      Guard Visitor Management
+    </div>
 
   </div>
+
 
   <!-- =====================================================
        GUARD
@@ -228,15 +241,20 @@
 
   <div class="card">
 
-    <label for="guardName">Nama Guard</label>
+    <label for="guardName">
+      Nama Guard
+    </label>
 
     <select id="guardName">
 
-      <option value="">-- Pilih Guard --</option>
+      <option value="">
+        -- Pilih Guard --
+      </option>
 
     </select>
 
   </div>
+
 
   <!-- =====================================================
        QR SCANNER
@@ -244,17 +262,39 @@
 
   <div class="card">
 
-    <div class="section-title">Scan Visitor QR</div>
+    <div class="section-title">
+      Scan Visitor QR
+    </div>
 
     <div id="reader"></div>
 
-    <div id="scannerMessage" class="message">Tekan START CAMERA untuk scan QR Visitor Pass.</div>
+    <div
+      id="scannerMessage"
+      class="message"
+    >
+      Tekan START CAMERA untuk scan QR Visitor Pass.
+    </div>
 
-    <button id="startBtn" type="button" onclick="startScanner()">START CAMERA</button>
+    <button
+      id="startBtn"
+      type="button"
+      onclick="startScanner()"
+    >
+      START CAMERA
+    </button>
 
-    <button id="stopBtn" type="button" class="btn-stop" onclick="stopScanner()" disabled>STOP CAMERA</button>
+    <button
+      id="stopBtn"
+      type="button"
+      class="btn-stop"
+      onclick="stopScanner()"
+      disabled
+    >
+      STOP CAMERA
+    </button>
 
   </div>
+
 
   <!-- =====================================================
        MANUAL SEARCH
@@ -262,139 +302,274 @@
 
   <div class="card">
 
-    <div class="section-title">Manual Visitor ID</div>
+    <div class="section-title">
+      Manual Visitor ID
+    </div>
 
-    <input id="visitorIdInput" type="text" placeholder="VIS-20261007-83BE0226" autocomplete="off">
+    <input
+      id="visitorIdInput"
+      type="text"
+      placeholder="VIS-20261007-83BE0226"
+      autocomplete="off"
+    >
 
-    <button type="button" onclick="searchVisitor()">SEARCH VISITOR</button>
+    <button
+      type="button"
+      onclick="searchVisitor()"
+    >
+      SEARCH VISITOR
+    </button>
 
   </div>
+
 
   <!-- =====================================================
        VISITOR RESULT
   ====================================================== -->
 
-  <div id="visitorResult" class="card hidden">
+  <div
+    id="visitorResult"
+    class="card hidden"
+  >
 
-    <div class="section-title">Visitor Information</div>
+    <div class="section-title">
+      Visitor Information
+    </div>
+
 
     <div id="visitorStatus" class="status">-</div>
 
     <div id="visitorStatusMessage" class="message hidden"></div>
 
-    <div class="detail-row">
-
-      <div class="detail-label">Visitor ID</div>
-
-      <div id="detailVisitorId" class="detail-value">-</div>
-
-    </div>
 
     <div class="detail-row">
 
-      <div class="detail-label">Unit Rumah</div>
+      <div class="detail-label">
+        Visitor ID
+      </div>
 
-      <div id="detailUnit" class="detail-value">-</div>
+      <div
+        id="detailVisitorId"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
 
     <div class="detail-row">
 
-      <div class="detail-label">Nama Penduduk</div>
+      <div class="detail-label">
+        Unit Rumah
+      </div>
 
-      <div id="detailResident" class="detail-value">-</div>
+      <div
+        id="detailUnit"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
 
     <div class="detail-row">
 
-      <div class="detail-label">No. Telefon</div>
+      <div class="detail-label">
+        Nama Penduduk
+      </div>
 
-      <div id="detailPhone" class="detail-value">-</div>
+      <div
+        id="detailResident"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
 
     <div class="detail-row">
 
-      <div class="detail-label">Jenis Pelawat</div>
+      <div class="detail-label">
+        No. Telefon
+      </div>
 
-      <div id="detailVisitorType" class="detail-value">-</div>
+      <div
+        id="detailPhone"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
 
     <div class="detail-row">
 
-      <div class="detail-label">Nama Pelawat</div>
+      <div class="detail-label">
+        Jenis Pelawat
+      </div>
 
-      <div id="detailVisitorName" class="detail-value">-</div>
+      <div
+        id="detailVisitorType"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
 
     <div class="detail-row">
 
-      <div class="detail-label">No. Plat</div>
+      <div class="detail-label">
+        Nama Pelawat
+      </div>
 
-      <div id="detailPlate" class="detail-value">-</div>
+      <div
+        id="detailVisitorName"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
 
     <div class="detail-row">
 
-      <div class="detail-label">Jenis Kenderaan</div>
+      <div class="detail-label">
+        No. Plat
+      </div>
 
-      <div id="detailVehicle" class="detail-value">-</div>
+      <div
+        id="detailPlate"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
 
     <div class="detail-row">
 
-      <div class="detail-label">Tujuan Lawatan</div>
+      <div class="detail-label">
+        Jenis Kenderaan
+      </div>
 
-      <div id="detailPurpose" class="detail-value">-</div>
+      <div
+        id="detailVehicle"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
 
     <div class="detail-row">
 
-      <div class="detail-label">Valid From</div>
+      <div class="detail-label">
+        Tujuan Lawatan
+      </div>
 
-      <div id="detailValidFrom" class="detail-value">-</div>
+      <div
+        id="detailPurpose"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
 
     <div class="detail-row">
 
-      <div class="detail-label">Valid Until</div>
+      <div class="detail-label">
+        Valid From
+      </div>
 
-      <div id="detailValidUntil" class="detail-value">-</div>
+      <div
+        id="detailValidFrom"
+        class="detail-value"
+      >
+        -
+      </div>
 
     </div>
+
+
+    <div class="detail-row">
+
+      <div class="detail-label">
+        Valid Until
+      </div>
+
+      <div
+        id="detailValidUntil"
+        class="detail-value"
+      >
+        -
+      </div>
+
+    </div>
+
 
     <!-- CHECK IN -->
 
-    <div id="checkInArea" class="hidden">
+    <div
+      id="checkInArea"
+      class="hidden"
+    >
 
-      <button id="checkInBtn" type="button" class="btn-checkin" onclick="checkInVisitor()">CHECK IN</button>
+      <button
+        id="checkInBtn"
+        type="button"
+        class="btn-checkin"
+        onclick="checkInVisitor()"
+      >
+        CHECK IN
+      </button>
 
     </div>
 
+
     <!-- ALREADY CHECKED IN -->
 
-    <div id="alreadyCheckedIn" class="message warning hidden">SUDAH CHECK IN</div>
+    <div
+      id="alreadyCheckedIn"
+      class="message warning hidden"
+    >
+      SUDAH CHECK IN
+    </div>
 
   </div>
+
 
   <!-- =====================================================
        GLOBAL MESSAGE
   ====================================================== -->
 
-  <div id="globalMessage" class="message hidden"></div>
+  <div
+    id="globalMessage"
+    class="message hidden"
+  >
+  </div>
 
-  <div class="small-note">Alam Idaman Visitor Management System</div>
+
+  <div class="small-note">
+    Alam Idaman Visitor Management System
+  </div>
+
 
 </div>
 
+
 <script>
+
 
 /* =========================================================
    API CONFIG
@@ -403,6 +578,7 @@
 const API_URL =
   'https://script.google.com/macros/s/AKfycby9wbRoLvhfbOOS386zFsYE36vLdoyrGQ3eUq2V4hlZh0t2zKDUxkQK5bJQK319gzWScQ/exec';
 
+
 let scanner = null;
 
 let scanning = false;
@@ -410,6 +586,7 @@ let scanning = false;
 let scanLocked = false;
 
 let currentVisitor = null;
+
 
 /* =========================================================
    PAGE LOAD
@@ -423,6 +600,7 @@ window.addEventListener(
 
   }
 );
+
 
 /* =========================================================
    LOAD GUARDS
@@ -461,14 +639,21 @@ function loadGuards() {
 
         }
 
-        const select = document.getElementById('guardName');
+
+        const select =
+          document.getElementById(
+            'guardName'
+          );
+
 
         if (!select) {
           return;
         }
 
+
         select.innerHTML =
           '<option value="">-- Pilih Guard --</option>';
+
 
         const guards =
           Array.isArray(
@@ -477,11 +662,14 @@ function loadGuards() {
             ? response.guards
             : [];
 
+
         guards.forEach(
           function(guard) {
 
             const option =
-              document.createElement('option');
+              document.createElement(
+                'option'
+              );
 
             option.value =
               guard;
@@ -489,10 +677,13 @@ function loadGuards() {
             option.textContent =
               guard;
 
-            select.appendChild(option);
+            select.appendChild(
+              option
+            );
 
           }
         );
+
 
         if (
           guards.length === 0
@@ -512,8 +703,12 @@ function loadGuards() {
           callbackName
         ];
 
+
         const script =
-          document.getElementById(callbackName);
+          document.getElementById(
+            callbackName
+          );
+
 
         if (script) {
           script.remove();
@@ -523,6 +718,7 @@ function loadGuards() {
 
     };
 
+
   loadApi(
     'guards',
     {},
@@ -530,6 +726,7 @@ function loadGuards() {
   );
 
 }
+
 
 /* =========================================================
    START CAMERA
@@ -549,13 +746,16 @@ async function startScanner() {
   
   scanLocked = false;
 
+
   setScannerMessage(
     'Memulakan kamera...'
   );
 
+
   document.getElementById(
     'startBtn'
   ).disabled = true;
+
 
   try {
 
@@ -569,6 +769,7 @@ async function startScanner() {
 
     }
 
+
     if (
       !navigator.mediaDevices ||
       !navigator.mediaDevices.getUserMedia
@@ -579,6 +780,7 @@ async function startScanner() {
       );
 
     }
+
 
     /*
      * Request camera permission.
@@ -597,6 +799,7 @@ async function startScanner() {
 
       });
 
+
     /*
      * Stop temporary stream.
      */
@@ -609,13 +812,16 @@ async function startScanner() {
         }
       );
 
+
     scanner =
       new Html5Qrcode(
         'reader'
       );
 
+
     const cameras =
       await Html5Qrcode.getCameras();
+
 
     if (
       !cameras ||
@@ -628,12 +834,14 @@ async function startScanner() {
 
     }
 
+
     /*
      * Default camera.
      */
 
     let cameraId =
       cameras[0].id;
+
 
     /*
      * Try rear camera.
@@ -651,6 +859,7 @@ async function startScanner() {
           ''
         ).toLowerCase();
 
+
       if (
         label.includes('back') ||
         label.includes('rear') ||
@@ -665,6 +874,7 @@ async function startScanner() {
       }
 
     }
+
 
     /*
      * Start scanner.
@@ -690,6 +900,7 @@ async function startScanner() {
                 height
               );
 
+
             const size =
               Math.min(
                 Math.floor(
@@ -697,6 +908,7 @@ async function startScanner() {
                 ),
                 300
               );
+
 
             return {
 
@@ -714,19 +926,25 @@ async function startScanner() {
 
       },
 
+
       function(decodedText) {
 
         if (scanLocked) {
           return;
         }
 
+
         if (!decodedText) {
           return;
         }
 
-        handleQrResult(decodedText);
+
+        handleQrResult(
+          decodedText
+        );
 
       },
+
 
       function() {
 
@@ -738,15 +956,19 @@ async function startScanner() {
 
     );
 
+
     scanning = true;
+
 
     document.getElementById(
       'startBtn'
     ).disabled = true;
 
+
     document.getElementById(
       'stopBtn'
     ).disabled = false;
+
 
     setScannerMessage(
       'Kamera aktif. Halakan kamera ke QR Visitor Pass.'
@@ -760,18 +982,23 @@ async function startScanner() {
       error
     );
 
+
     scanning = false;
+
 
     document.getElementById(
       'startBtn'
     ).disabled = false;
 
+
     document.getElementById(
       'stopBtn'
     ).disabled = true;
 
+
     let message =
       'Kamera tidak dapat dimulakan.';
+
 
     if (
       error.message ===
@@ -819,11 +1046,15 @@ async function startScanner() {
 
     }
 
-    setScannerMessage(message);
+
+    setScannerMessage(
+      message
+    );
 
   }
 
 }
+
 
 /* =========================================================
    STOP CAMERA
@@ -832,6 +1063,7 @@ async function startScanner() {
 async function stopScanner() {
 
   scanLocked = true;
+
 
   if (
     !scanner ||
@@ -842,13 +1074,16 @@ async function stopScanner() {
       'startBtn'
     ).disabled = false;
 
+
     document.getElementById(
       'stopBtn'
     ).disabled = true;
 
+
     return;
 
   }
+
 
   try {
 
@@ -857,9 +1092,12 @@ async function stopScanner() {
   }
   catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
 
   }
+
 
   try {
 
@@ -868,21 +1106,27 @@ async function stopScanner() {
   }
   catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
 
   }
+
 
   scanner = null;
 
   scanning = false;
 
+
   document.getElementById(
     'startBtn'
   ).disabled = false;
 
+
   document.getElementById(
     'stopBtn'
   ).disabled = true;
+
 
   setScannerMessage(
     'Scanner dihentikan.'
@@ -932,12 +1176,15 @@ function handleQrResult(
     return;
   }
 
+
   scanLocked = true;
+
 
   const visitorId =
     String(
       decodedText || ''
     ).trim();
+
 
   /*
    * QR mesti bermula dengan VIS-
@@ -951,13 +1198,16 @@ function handleQrResult(
 
     scanLocked = false;
 
+
     setScannerMessage(
       'QR tidak sah. Sila gunakan QR Visitor Pass Alam Idaman.'
     );
 
+
     return;
 
   }
+
 
   /*
    * Stop camera.
@@ -965,19 +1215,27 @@ function handleQrResult(
 
   stopScanner();
 
+
   /*
    * Masukkan Visitor ID.
    */
 
-  document.getElementById('visitorIdInput').value = visitorId;
+  document.getElementById(
+    'visitorIdInput'
+  ).value =
+    visitorId;
+
 
   /*
    * Search visitor.
    */
 
-  searchVisitor(visitorId);
+  searchVisitor(
+    visitorId
+  );
 
 }
+
 
 /* =========================================================
    SEARCH VISITOR
@@ -987,7 +1245,11 @@ function searchVisitor(
   visitorId = ''
 ) {
 
-  const input = document.getElementById('visitorIdInput');
+  const input =
+    document.getElementById(
+      'visitorIdInput'
+    );
+
 
   if (!visitorId) {
 
@@ -996,6 +1258,7 @@ function searchVisitor(
 
   }
 
+
   if (!visitorId) {
 
     showGlobalMessage(
@@ -1003,24 +1266,30 @@ function searchVisitor(
       'error'
     );
 
+
     return;
 
   }
 
+
   visitorId =
     visitorId.toUpperCase();
 
+
   input.value =
     visitorId;
+
 
   showGlobalMessage(
     'Mencari Visitor ID...',
     ''
   );
 
+
   const callbackName =
     'visitorCallback_' +
     Date.now();
+
 
   window[callbackName] =
     function(response) {
@@ -1034,11 +1303,15 @@ function searchVisitor(
 
           currentVisitor = null;
 
+
           document
             .getElementById(
               'visitorResult'
             )
-            .classList.add('hidden');
+            .classList.add(
+              'hidden'
+            );
+
 
           showGlobalMessage(
             response &&
@@ -1048,14 +1321,20 @@ function searchVisitor(
             'error'
           );
 
+
           return;
 
         }
 
+
         currentVisitor =
           response.visitor;
 
-        displayVisitor(response.visitor);
+
+        displayVisitor(
+          response.visitor
+        );
+
 
         /*
          * Rekod setiap scan selepas
@@ -1064,6 +1343,8 @@ function searchVisitor(
 
         recordScan();
 
+
+
       }
       finally {
 
@@ -1071,8 +1352,12 @@ function searchVisitor(
           callbackName
         ];
 
+
         const script =
-          document.getElementById(callbackName);
+          document.getElementById(
+            callbackName
+          );
+
 
         if (script) {
           script.remove();
@@ -1081,6 +1366,7 @@ function searchVisitor(
       }
 
     };
+
 
   loadApi(
     'visitor',
@@ -1092,6 +1378,7 @@ function searchVisitor(
   );
 
 }
+
 
 /* =========================================================
    DISPLAY VISITOR
@@ -1166,10 +1453,12 @@ function recordScan() {
     return;
   }
 
+
   const guard =
     document.getElementById(
       'guardName'
     ).value;
+
 
   if (!guard) {
 
@@ -1182,9 +1471,11 @@ function recordScan() {
 
   }
 
+
   const callbackName =
     'scanCallback_' +
     Date.now();
+
 
   window[callbackName] =
     function(response) {
@@ -1196,12 +1487,15 @@ function recordScan() {
           response
         );
 
+
         if (
           response &&
           response.success
         ) {
 
-          console.log('SCAN berjaya direkodkan.');
+          console.log(
+            'SCAN berjaya direkodkan.'
+          );
 
         }
         else {
@@ -1222,8 +1516,12 @@ function recordScan() {
           callbackName
         ];
 
+
         const script =
-          document.getElementById(callbackName);
+          document.getElementById(
+            callbackName
+          );
+
 
         if (script) {
           script.remove();
@@ -1232,6 +1530,7 @@ function recordScan() {
       }
 
     };
+
 
   loadApi(
     'scan',
@@ -1247,6 +1546,7 @@ function recordScan() {
 
 }
 
+
 /* =========================================================
    CHECK IN
 ========================================================= */
@@ -1260,14 +1560,17 @@ function checkInVisitor() {
       'error'
     );
 
+
     return;
 
   }
+
 
   const guard =
     document.getElementById(
       'guardName'
     ).value;
+
 
   if (!guard) {
 
@@ -1276,21 +1579,30 @@ function checkInVisitor() {
       'error'
     );
 
+
     return;
 
   }
 
-  const button = document.getElementById('checkInBtn');
+
+  const button =
+    document.getElementById(
+      'checkInBtn'
+    );
+
 
   button.disabled =
     true;
 
+
   button.textContent =
     'PROCESSING...';
+
 
   const callbackName =
     'checkInCallback_' +
     Date.now();
+
 
   window[callbackName] =
     function(response) {
@@ -1305,7 +1617,11 @@ function checkInVisitor() {
           currentVisitor.checkedIn =
             true;
 
-          displayVisitor(currentVisitor);
+
+          displayVisitor(
+            currentVisitor
+          );
+
 
           showGlobalMessage(
             '✓ Pelawat berjaya CHECK IN. Guard: ' +
@@ -1332,15 +1648,21 @@ function checkInVisitor() {
         button.disabled =
           false;
 
+
         button.textContent =
           'CHECK IN';
+
 
         delete window[
           callbackName
         ];
 
+
         const script =
-          document.getElementById(callbackName);
+          document.getElementById(
+            callbackName
+          );
+
 
         if (script) {
           script.remove();
@@ -1349,6 +1671,7 @@ function checkInVisitor() {
       }
 
     };
+
 
   loadApi(
     'checkin',
@@ -1364,6 +1687,7 @@ function checkInVisitor() {
 
 }
 
+
 /* =========================================================
    API JSONP
 ========================================================= */
@@ -1377,20 +1701,24 @@ function loadApi(
   const query =
     new URLSearchParams();
 
+
   query.set(
     'api',
     api
   );
+
 
   query.set(
     'callback',
     callbackName
   );
 
+
   query.set(
     '_',
     Date.now()
   );
+
 
   Object.keys(
     params || {}
@@ -1406,18 +1734,25 @@ function loadApi(
       }
     );
 
+
   const script =
-    document.createElement('script');
+    document.createElement(
+      'script'
+    );
+
 
   script.id =
     callbackName;
+
 
   script.src =
     API_URL +
     '?' +
     query.toString();
 
+
   script.async = true;
+
 
   script.onerror =
     function() {
@@ -1426,6 +1761,7 @@ function loadApi(
         'API request failed:',
         api
       );
+
 
       if (
         window[callbackName]
@@ -1437,19 +1773,26 @@ function loadApi(
 
       }
 
+
       if (
         script.parentNode
       ) {
 
-        script.parentNode.removeChild(script);
+        script.parentNode.removeChild(
+          script
+        );
 
       }
 
     };
 
-  document.body.appendChild(script);
+
+  document.body.appendChild(
+    script
+  );
 
 }
+
 
 /* =========================================================
    UI
@@ -1459,29 +1802,41 @@ function setScannerMessage(
   message
 ) {
 
-  document.getElementById('scannerMessage').textContent = message;
+  document.getElementById(
+    'scannerMessage'
+  ).textContent =
+    message;
 
 }
+
 
 function showGlobalMessage(
   message,
   type
 ) {
 
-  const element = document.getElementById('globalMessage');
+  const element =
+    document.getElementById(
+      'globalMessage'
+    );
+
 
   element.textContent =
     message;
 
+
   element.className =
     'message';
+
 
   if (
     type ===
     'success'
   ) {
 
-    element.classList.add('success');
+    element.classList.add(
+      'success'
+    );
 
   }
   else if (
@@ -1489,7 +1844,9 @@ function showGlobalMessage(
     'error'
   ) {
 
-    element.classList.add('error');
+    element.classList.add(
+      'error'
+    );
 
   }
   else if (
@@ -1497,13 +1854,19 @@ function showGlobalMessage(
     'warning'
   ) {
 
-    element.classList.add('warning');
+    element.classList.add(
+      'warning'
+    );
 
   }
 
-  element.classList.remove('hidden');
+
+  element.classList.remove(
+    'hidden'
+  );
 
 }
+
 
 /* =========================================================
    VISIBILITY
@@ -1524,6 +1887,7 @@ document.addEventListener(
 
   }
 );
+
 
 </script>
 
