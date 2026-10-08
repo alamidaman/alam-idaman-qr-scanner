@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="ms">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Reject Visitor - Alam Idaman</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f5f7fa;
+      font-family: Arial, sans-serif;
+      color: #222;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 30px auto;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      color: #222;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      color: #777;
+      font-size: 14px;
+    }
+
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .detail {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: flex;
+      padding: 12px 14px;
+      border-bottom: 1px solid #eeeeee;
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      width: 42%;
+      font-size: 13px;
+      color: #777;
+    }
+
+    .value {
+      width: 58%;
+      font-size: 14px;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .status {
+      text-align: center;
+      font-weight: bold;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
+    .status-valid {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-rejected {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .status-expired {
+      background: #eeeeee;
+      color: #616161;
+    }
+
+    .btn-reject {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 15px;
+      background: #d32f2f;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-reject:hover {
+      background: #b71c1c;
+    }
+
+    .btn-reject:disabled {
+      background: #999999;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      padding: 14px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .loading {
+      text-align: center;
+      color: #777;
+      padding: 20px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #999;
+      font-size: 12px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <div class="container">
+
+
+    <div class="card">
+
+
+      <!-- HEADER -->
+
+      <div class="header">
+
+        <h1>
+          ALAM IDAMAN
+        </h1>
+
+        <p>
+          Visitor Management System
+        </p>
+
+      </div>
+
+
+      <!-- LOADING -->
+
+      <div
+        id="loading"
+        class="loading"
+      >
+
+        Memuatkan maklumat visitor...
+
+      </div>
+
+
+      <!-- CONTENT -->
+
+      <div
+        id="content"
+        class="hidden"
+      >
+
+
+        <!-- WARNING -->
+
+        <div class="warning">
+
+          <strong>
+            Perhatian
+          </strong>
+
+          <br>
+
+          Anda akan menolak visitor ini.
+
+          Setelah ditolak, visitor tidak akan
+          dibenarkan untuk CHECK IN di guard house.
+
+        </div>
+
+
+        <!-- MESSAGE -->
+
+        <div
+          id="globalMessage"
+          class="message"
+        >
+        </div>
+
+
+        <!-- VISITOR DETAILS -->
+
+        <div class="detail">
+
+
+          <!-- VISITOR ID -->
+
+          <div class="row">
+
+            <div class="label">
+              Visitor ID
+            </div>
+
+            <div
+              id="visitorId"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <!-- UNIT -->
+
+          <div class="row">
+
+            <div class="label">
+              Unit Rumah
+            </div>
+
+            <div
+              id="unit"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <!-- RESIDENT -->
+
+          <div class="row">
+
+            <div class="label">
+              Nama Penduduk
+            </div>
+
+            <div
+              id="residentName"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <!-- VISITOR -->
+
+          <div class="row">
+
+            <div class="label">
+              Nama Pelawat
+            </div>
+
+            <div
+              id="visitorName"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <!-- PLATE -->
+
+          <div class="row">
+
+            <div class="label">
+              No. Plat
+            </div>
+
+            <div
+              id="plate"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <!-- VEHICLE -->
+
+          <div class="row">
+
+            <div class="label">
+              Jenis Kenderaan
+            </div>
+
+            <div
+              id="vehicle"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <!-- VISITOR TYPE -->
+
+          <div class="row">
+
+            <div class="label">
+              Jenis Pelawat
+            </div>
+
+            <div
+              id="visitorType"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <!-- PURPOSE -->
+
+          <div class="row">
+
+            <div class="label">
+              Tujuan Lawatan
+            </div>
+
+            <div
+              id="purpose"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <!-- VALID FROM -->
+
+          <div class="row">
+
+            <div class="label">
+              Valid From
+            </div>
+
+            <div
+              id="validFrom"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <!-- VALID UNTIL -->
+
+          <div class="row">
+
+            <div class="label">
+              Valid Until
+            </div>
+
+            <div
+              id="validUntil"
+              class="value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div
+          id="status"
+          class="status status-valid"
+        >
+
+          VALID
+
+        </div>
+
+
+        <!-- REJECT BUTTON -->
+
+        <button
+          id="rejectBtn"
+          class="btn-reject"
+          type="button"
+          onclick="rejectVisitor()"
+        >
+
+          REJECT VISITOR
+
+        </button>
+
+
+      </div>
+
+
+      <!-- FOOTER -->
+
+      <div class="footer">
+
+        Alam Idaman Visitor Management System
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<script>
+
+
+/* =========================================================
+   API CONFIG
+========================================================= */
+
+const API_URL =
+  'https://script.google.com/macros/s/AKfycby9wbRoLvhfbOOS386zFsYE36vLdoyrGQ3eUq2V4hlZh0t2zKDUxkQK5bJQK319gzWScQ/exec';
+
+
+let visitorId = '';
+
+let currentVisitor = null;
+
+
+/* =========================================================
+   PAGE LOAD
+========================================================= */
+
+window.addEventListener(
+  'load',
+  function() {
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    visitorId =
+      params.get('visitorId') || '';
+
+
+    if (!visitorId) {
+
+      document
+        .getElementById('loading')
+        .textContent =
+          'Visitor ID tidak dijumpai.';
+
+      return;
+
+    }
+
+
+    loadVisitor();
+
+  }
+);
+
+
+/* =========================================================
+   LOAD VISITOR
+========================================================= */
+
+function loadVisitor() {
+
+  const callbackName =
+    'visitorCallback_' +
+    Date.now();
+
+
+  window[callbackName] =
+    function(response) {
+
+      try {
+
+        if (
+          !response ||
+          !response.success
+        ) {
+
+          document
+            .getElementById('loading')
+            .textContent =
+              response &&
+              response.message
+                ? response.message
+                : 'Visitor tidak dijumpai.';
+
+          return;
+
+        }
+
+
+        currentVisitor =
+          response.visitor;
+
+
+        displayVisitor(
+          currentVisitor
+        );
+
+
+      }
+      finally {
+
+        delete window[
+          callbackName
+        ];
+
+
+        const script =
+          document.getElementById(
+            callbackName
+          );
+
+
+        if (script) {
+
+          script.remove();
+
+        }
+
+      }
+
+    };
+
+
+  loadApi(
+    'visitor',
+    {
+      visitorId:
+        visitorId
+    },
+    callbackName
+  );
+
+}
+
+
+/* =========================================================
+   DISPLAY VISITOR
+========================================================= */
+
+function displayVisitor(
+  visitor
+) {
+
+  document
+    .getElementById('loading')
+    .classList.add(
+      'hidden'
+    );
+
+
+  document
+    .getElementById('content')
+    .classList.remove(
+      'hidden'
+    );
+
+
+  document
+    .getElementById('visitorId')
+    .textContent =
+      visitor.visitorId || '-';
+
+
+  document
+    .getElementById('unit')
+    .textContent =
+      visitor.unit || '-';
+
+
+  document
+    .getElementById('residentName')
+    .textContent =
+      visitor.residentName || '-';
+
+
+  document
+    .getElementById('visitorName')
+    .textContent =
+      visitor.visitorName || '-';
+
+
+  document
+    .getElementById('plate')
+    .textContent =
+      visitor.plate || '-';
+
+
+  document
+    .getElementById('vehicle')
+    .textContent =
+      visitor.vehicleType || '-';
+
+
+  document
+    .getElementById('visitorType')
+    .textContent =
+      visitor.actualVisitorType ||
+      visitor.visitorType ||
+      '-';
+
+
+  document
+    .getElementById('purpose')
+    .textContent =
+      visitor.purpose || '-';
+
+
+  document
+    .getElementById('validFrom')
+    .textContent =
+      visitor.validFrom || '-';
+
+
+  document
+    .getElementById('validUntil')
+    .textContent =
+      visitor.validUntil || '-';
+
+
+  updateStatus(
+    visitor
+  );
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function updateStatus(
+  visitor
+) {
+
+  const status =
+    document.getElementById(
+      'status'
+    );
+
+
+  const button =
+    document.getElementById(
+      'rejectBtn'
+    );
+
+
+  status.className =
+    'status';
+
+
+  /* REJECTED */
+
+  if (
+    visitor.status ===
+    'REJECTED'
+  ) {
+
+    status.classList.add(
+      'status-rejected'
+    );
+
+
+    status.textContent =
+      'REJECTED';
+
+
+    button.disabled =
+      true;
+
+
+    button.textContent =
+      'VISITOR SUDAH DITOLAK';
+
+
+    return;
+
+  }
+
+
+  /* EXPIRED */
+
+  if (
+    visitor.status ===
+    'EXPIRED'
+  ) {
+
+    status.classList.add(
+      'status-expired'
+    );
+
+
+    status.textContent =
+      'EXPIRED';
+
+
+    button.disabled =
+      true;
+
+
+    button.textContent =
+      'VISITOR SUDAH EXPIRED';
+
+
+    return;
+
+  }
+
+
+  /* VALID */
+
+  status.classList.add(
+    'status-valid'
+  );
+
+
+  status.textContent =
+    'VALID';
+
+
+  button.disabled =
+    false;
+
+
+  button.textContent =
+    'REJECT VISITOR';
+
+}
+
+
+/* =========================================================
+   REJECT VISITOR
+========================================================= */
+
+function rejectVisitor() {
+
+  if (!currentVisitor) {
+
+    return;
+
+  }
+
+
+  if (
+    currentVisitor.status ===
+    'REJECTED'
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    currentVisitor.status ===
+    'EXPIRED'
+  ) {
+
+    return;
+
+  }
+
+
+  const confirmed =
+    window.confirm(
+      'Adakah anda pasti mahu REJECT visitor ini?'
+    );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      'rejectBtn'
+    );
+
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    'PROCESSING...';
+
+
+  const callbackName =
+    'rejectCallback_' +
+    Date.now();
+
+
+  window[callbackName] =
+    function(response) {
+
+      try {
+
+        if (
+          response &&
+          response.success
+        ) {
+
+          currentVisitor.status =
+            'REJECTED';
+
+
+          updateStatus(
+            currentVisitor
+          );
+
+
+          showMessage(
+            '✓ Visitor telah ditolak. Visitor ini tidak akan dibenarkan untuk CHECK IN.',
+            'success'
+          );
+
+        }
+        else {
+
+          button.disabled =
+            false;
+
+
+          button.textContent =
+            'REJECT VISITOR';
+
+
+          showMessage(
+            response &&
+            response.message
+              ? response.message
+              : 'Gagal reject visitor.',
+            'error'
+          );
+
+        }
+
+      }
+      finally {
+
+        delete window[
+          callbackName
+        ];
+
+
+        const script =
+          document.getElementById(
+            callbackName
+          );
+
+
+        if (script) {
+
+          script.remove();
+
+        }
+
+      }
+
+    };
+
+
+  loadApi(
+    'reject',
+    {
+      visitorId:
+        currentVisitor.visitorId
+    },
+    callbackName
+  );
+
+}
+
+
+/* =========================================================
+   API JSONP
+========================================================= */
+
+function loadApi(
+  api,
+  params,
+  callbackName
+) {
+
+  const query =
+    new URLSearchParams();
+
+
+  query.set(
+    'api',
+    api
+  );
+
+
+  query.set(
+    'callback',
+    callbackName
+  );
+
+
+  query.set(
+    '_',
+    Date.now()
+  );
+
+
+  Object.keys(
+    params || {}
+  )
+    .forEach(
+      function(key) {
+
+        query.set(
+          key,
+          params[key]
+        );
+
+      }
+    );
+
+
+  const script =
+    document.createElement(
+      'script'
+    );
+
+
+  script.id =
+    callbackName;
+
+
+  script.src =
+    API_URL +
+    '?' +
+    query.toString();
+
+
+  script.async =
+    true;
+
+
+  script.onerror =
+    function() {
+
+      showMessage(
+        'Tidak dapat berhubung dengan server.',
+        'error'
+      );
+
+
+      delete window[
+        callbackName
+      ];
+
+
+      if (
+        script.parentNode
+      ) {
+
+        script.parentNode.removeChild(
+          script
+        );
+
+      }
+
+    };
+
+
+  document.body.appendChild(
+    script
+  );
+
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMessage(
+  message,
+  type
+) {
+
+  const element =
+    document.getElementById(
+      'globalMessage'
+    );
+
+
+  element.textContent =
+    message;
+
+
+  element.className =
+    'message show';
+
+
+  if (
+    type ===
+    'success'
+  ) {
+
+    element.classList.add(
+      'success'
+    );
+
+  }
+  else {
+
+    element.classList.add(
+      'error'
+    );
+
+  }
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
