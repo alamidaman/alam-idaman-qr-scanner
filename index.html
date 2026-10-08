@@ -1473,39 +1473,48 @@ function displayVisitor(
 
 
   const status =
-    document.getElementById(
-      'visitorStatus'
-    );
-
+  document.getElementById(
+    'visitorStatus'
+  );
 
   status.className =
     'status';
-
-
+  
   if (
     visitor.status ===
-    'EXPIRED'
+    'REJECTED'
   ) {
-
+  
     status.classList.add(
       'status-expired'
     );
-
-
+  
+    status.textContent =
+      'REJECTED';
+  
+  }
+  else if (
+    visitor.status ===
+    'EXPIRED'
+  ) {
+  
+    status.classList.add(
+      'status-expired'
+    );
+  
     status.textContent =
       'EXPIRED';
-
+  
   }
   else {
-
+  
     status.classList.add(
       'status-valid'
     );
-
-
+  
     status.textContent =
       'VALID';
-
+  
   }
 
 
@@ -1537,11 +1546,13 @@ function displayVisitor(
 
   if (
     visitor.status ===
+    'REJECTED' ||
+    visitor.status ===
     'EXPIRED'
   ) {
-
+  
     return;
-
+  
   }
 
 
