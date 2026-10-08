@@ -574,8 +574,6 @@
 	function searchVisitor(visitorId = '') {
 		const input = document.getElementById('visitorIdInput');
 	
-		resetVisitorInformation();
-	
 		if (!visitorId) visitorId = input.value.trim();
 	
 		if (!visitorId) {
@@ -584,6 +582,9 @@
 		}
 	
 		visitorId = visitorId.toUpperCase();
+	
+		resetVisitorInformation();
+	
 		input.value = visitorId;
 	
 		showGlobalMessage('MENCARI VISITOR...', '');
