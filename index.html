@@ -573,44 +573,62 @@
 
 	function searchVisitor(visitorId = '') {
 		const input = document.getElementById('visitorIdInput');
-
+	
+		resetVisitorInformation();
+	
 		if (!visitorId) visitorId = input.value.trim();
-
+	
 		if (!visitorId) {
 			showGlobalMessage('Sila masukkan Visitor ID.', 'error');
 			return;
 		}
-
+	
 		visitorId = visitorId.toUpperCase();
 		input.value = visitorId;
-
-		showGlobalMessage('Mencari Visitor ID...', '');
-
+	
+		showGlobalMessage('MENCARI VISITOR...', '');
+	
 		const callbackName = 'visitorCallback_' + Date.now();
-
+	
 		window[callbackName] = function(response) {
 			try {
 				if (!response || !response.success) {
 					currentVisitor = null;
 					document.getElementById('visitorResult').classList.add('hidden');
-					showGlobalMessage(response && response.message ? response.message : 'Visitor tidak dijumpai.', 'error');
+					showGlobalMessage(
+						response && response.message
+							? response.message
+							: 'Visitor tidak dijumpai.',
+						'error'
+					);
 					return;
 				}
-
+	
 				currentVisitor = response.visitor;
 				displayVisitor(response.visitor);
-
 				recordScan();
+	
+				showGlobalMessage(
+					'Visitor berjaya dijumpai.',
+					'success'
+				);
 			}
 			finally {
 				delete window[callbackName];
-
+	
 				const script = document.getElementById(callbackName);
+	
 				if (script) script.remove();
 			}
 		};
-
-		loadApi('visitor', { visitorId: visitorId }, callbackName);
+	
+		loadApi(
+			'visitor',
+			{
+				visitorId: visitorId
+			},
+			callbackName
+		);
 	}
 
 
