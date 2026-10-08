@@ -5,10 +5,7 @@
 
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <title>Alam Idaman Guard</title>
 
@@ -212,1684 +209,638 @@
 
 <body>
 
+	<div class="container">
+
+		<!-- HEADER -->
+		<div class="card header">
+			<img src="logo.png" alt="Alam Idaman" class="logo">
+			<div class="subtitle">Guard Visitor Management</div>
+		</div>
+
+	  <!-- GUARD -->
+		<div class="card">
+			<label for="guardName">Nama Guard</label>
+			<select id="guardName">
+				<option value="">-- Pilih Guard --</option>
+			</select>
+		</div>
+
+	  <!-- QR SCANNER -->
+		<div class="card">
+			<div class="section-title">Scan Visitor QR</div>
+			<div id="reader"></div>
+			<div id="scannerMessage" class="message">Tekan START CAMERA untuk scan QR Visitor Pass.</div>
+			<button id="startBtn" type="button" onclick="startScanner()">START CAMERA</button>
+			<button id="stopBtn" type="button" class="btn-stop" onclick="stopScanner()" disabled>STOP CAMERA</button>
+		</div>
+
+	  <!-- MANUAL SEARCH -->
+		<div class="card">
+			<div class="section-title">Manual Visitor ID</div>
+			<input id="visitorIdInput" type="text" placeholder="VIS-20261007-83BE0226" autocomplete="off">
+			<button type="button" onclick="searchVisitor()">SEARCH VISITOR</button>
+		</div>
+
+	  <!-- VISITOR RESULT -->
+	  <div id="visitorResult" class="card hidden">
+
+			<div class="section-title">Visitor Information</div>
+			<div id="visitorStatus" class="status">-</div>
+			<div id="visitorStatusMessage" class="message hidden"></div>
+			
+			<div class="detail-row">
+				<div class="detail-label">Visitor ID</div>
+				<div id="detailVisitorId" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">Unit Rumah</div>
+				<div id="detailUnit" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">Nama Penduduk</div>
+				<div id="detailResident" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">No. Telefon</div>
+				<div id="detailPhone" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">Jenis Pelawat</div>
+				<div id="detailVisitorType" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">Nama Pelawat</div>
+				<div id="detailVisitorName" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">No. Plat</div>
+				<div id="detailPlate" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">Jenis Kenderaan</div>
+				<div id="detailVehicle" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">Tujuan Lawatan</div>
+				<div id="detailPurpose" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">Valid From</div>
+				<div id="detailValidFrom" class="detail-value">-</div>
+			</div>
+
+			<div class="detail-row">
+				<div class="detail-label">Valid Until</div>
+				<div id="detailValidUntil" class="detail-value">-</div>
+			</div>
+
+			<!-- CHECK IN -->
+			<div id="checkInArea" class="hidden">
+				<button id="checkInBtn" type="button" class="btn-checkin" onclick="checkInVisitor()">
+					CHECK IN
+				</button>
+			</div>
+
+			<!-- ALREADY CHECKED IN -->
+			<div id="alreadyCheckedIn" class="message warning hidden">
+				SUDAH CHECK IN
+			</div>
 
-<div class="container">
+		</div>
 
+		<!-- GLOBAL MESSAGE -->
+		<div id="globalMessage" class="message hidden"></div>
+		<div class="small-note">Alam Idaman Visitor Management System</div>
 
-  <!-- =====================================================
-       HEADER
-  ====================================================== -->
+	</div>
 
-  <div class="card header">
+	<script>
 
-    <img
-      src="logo.png"
-      alt="Alam Idaman"
-      class="logo"
-    >
 
-    <div class="subtitle">
-      Guard Visitor Management
-    </div>
+	/* =========================================================
+	   API CONFIG
+	========================================================= */
 
-  </div>
+	const API_URL =
+	  'https://script.google.com/macros/s/AKfycby9wbRoLvhfbOOS386zFsYE36vLdoyrGQ3eUq2V4hlZh0t2zKDUxkQK5bJQK319gzWScQ/exec';
 
 
-  <!-- =====================================================
-       GUARD
-  ====================================================== -->
+	let scanner 		= null;
+	let scanning 		= false;
+	let scanLocked 		= false;
+	let currentVisitor 	= null;
 
-  <div class="card">
 
-    <label for="guardName">
-      Nama Guard
-    </label>
+	/* =========================================================
+	   PAGE LOAD
+	========================================================= */
 
-    <select id="guardName">
+	window.addEventListener(
+		'load',
+		function() {
+			loadGuards();
+		}
+	);
 
-      <option value="">
-        -- Pilih Guard --
-      </option>
 
-    </select>
+	/* =========================================================
+	   LOAD GUARDS
+	========================================================= */
 
-  </div>
+	function loadGuards() {
+		const callbackName = 'guardCallback_' + Date.now();
 
+		window[callbackName] = function(response) {
+			try {
+				console.log('Guard API response:', response);
 
-  <!-- =====================================================
-       QR SCANNER
-  ====================================================== -->
+				if (!response || !response.success) {
+					showGlobalMessage(response && response.message ? response.message : 'Senarai Guard tidak dapat dimuatkan.', 'error');
+					return;
+				}
 
-  <div class="card">
+				const select = document.getElementById('guardName');
+				if (!select) return;
 
-    <div class="section-title">
-      Scan Visitor QR
-    </div>
+				select.innerHTML = '<option value="">-- Pilih Guard --</option>';
 
-    <div id="reader"></div>
+				const guards = Array.isArray(response.guards) ? response.guards : [];
 
-    <div
-      id="scannerMessage"
-      class="message"
-    >
-      Tekan START CAMERA untuk scan QR Visitor Pass.
-    </div>
+				guards.forEach(function(guard) {
+					const option = document.createElement('option');
+					option.value = guard;
+					option.textContent = guard;
+					select.appendChild(option);
+				});
 
-    <button
-      id="startBtn"
-      type="button"
-      onclick="startScanner()"
-    >
-      START CAMERA
-    </button>
+				if (guards.length === 0) {
+					showGlobalMessage('Tiada Guard dijumpai dalam sheet Guard.', 'warning');
+				}
+			} finally {
+				delete window[callbackName];
+
+				const script = document.getElementById(callbackName);
+				if (script) script.remove();
+			}
+		};
 
-    <button
-      id="stopBtn"
-      type="button"
-      class="btn-stop"
-      onclick="stopScanner()"
-      disabled
-    >
-      STOP CAMERA
-    </button>
+		loadApi('guards', {}, callbackName);
+	}
+
 
-  </div>
+	/* =========================================================
+	   START CAMERA
+	========================================================= */
 
+	async function startScanner() {
+		if (scanning) return;
+
+		resetVisitorInformation();
+		scanLocked = false;
+		setScannerMessage('Memulakan kamera...');
+		document.getElementById('startBtn').disabled = true;
+
+		try {
+			if (!window.isSecureContext) throw new Error('HTTPS_REQUIRED');
+			if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('CAMERA_NOT_SUPPORTED');
+
+			const stream = await navigator.mediaDevices.getUserMedia({
+				video: { facingMode: { ideal: 'environment' } },
+				audio: false
+			});
+
+			stream.getTracks().forEach(function(track) {
+				track.stop();
+			});
+
+			scanner = new Html5Qrcode('reader');
+
+			const cameras = await Html5Qrcode.getCameras();
+			if (!cameras || cameras.length === 0) throw new Error('NO_CAMERA');
+
+			let cameraId = cameras[0].id;
+
+			for (let i = 0; i < cameras.length; i++) {
+				const label = (cameras[i].label || '').toLowerCase();
+
+				if (label.includes('back') || label.includes('rear') || label.includes('environment')) {
+					cameraId = cameras[i].id;
+					break;
+				}
+			}
+
+			await scanner.start(
+				cameraId,
+				{
+					fps: 10,
+					qrbox: function(width, height) {
+						const minEdge = Math.min(width, height);
+						const size = Math.min(Math.floor(minEdge * 0.70), 300);
+
+						return { width: size, height: size };
+					},
+					aspectRatio: 1.0
+				},
+				function(decodedText) {
+					if (scanLocked || !decodedText) return;
+					handleQrResult(decodedText);
+				},
+				function() {}
+			);
+
+			scanning = true;
+			document.getElementById('startBtn').disabled = true;
+			document.getElementById('stopBtn').disabled = false;
+			setScannerMessage('Kamera aktif. Halakan kamera ke QR Visitor Pass.');
+		}
+		catch (error) {
+			console.error('Camera error:', error);
+
+			scanning = false;
+			document.getElementById('startBtn').disabled = false;
+			document.getElementById('stopBtn').disabled = true;
 
-  <!-- =====================================================
-       MANUAL SEARCH
-  ====================================================== -->
+			let message = 'Kamera tidak dapat dimulakan.';
+
+			if (error.message === 'HTTPS_REQUIRED') {
+				message = 'Scanner mesti menggunakan HTTPS.';
+			}
+			else if (error.message === 'CAMERA_NOT_SUPPORTED') {
+				message = 'Browser tidak menyokong akses kamera.';
+			}
+			else if (error.message === 'NO_CAMERA') {
+				message = 'Tiada kamera dikesan.';
+			}
+			else if (error.name === 'NotAllowedError') {
+				message = 'Akses kamera ditolak. Sila benarkan Camera untuk Chrome.';
+			}
+			else if (error.name === 'NotReadableError') {
+				message = 'Kamera sedang digunakan oleh aplikasi lain.';
+			}
 
-  <div class="card">
+			setScannerMessage(message);
+		}
+	}
 
-    <div class="section-title">
-      Manual Visitor ID
-    </div>
 
-    <input
-      id="visitorIdInput"
-      type="text"
-      placeholder="VIS-20261007-83BE0226"
-      autocomplete="off"
-    >
+	/* =========================================================
+		STOP CAMERA
+	========================================================= */
 
-    <button
-      type="button"
-      onclick="searchVisitor()"
-    >
-      SEARCH VISITOR
-    </button>
+	async function stopScanner() {
+		scanLocked = true;
 
-  </div>
+		if (!scanner || !scanning) {
+			document.getElementById('startBtn').disabled = false;
+			document.getElementById('stopBtn').disabled = true;
+			return;
+		}
 
+		try {
+			await scanner.stop();
+		}
+		catch (error) {
+			console.error(error);
+		}
 
-  <!-- =====================================================
-       VISITOR RESULT
-  ====================================================== -->
+		try {
+			scanner.clear();
+		}
+		catch (error) {
+			console.error(error);
+		}
 
-  <div
-    id="visitorResult"
-    class="card hidden"
-  >
+		scanner = null;
+		scanning = false;
 
-    <div class="section-title">
-      Visitor Information
-    </div>
+		document.getElementById('startBtn').disabled = false;
+		document.getElementById('stopBtn').disabled = true;
 
+		setScannerMessage('Scanner dihentikan.');
+	}
 
-    <div id="visitorStatus" class="status">-</div>
 
-    <div id="visitorStatusMessage" class="message hidden"></div>
+	/* =========================================================
+		RESET VISITOR INFORMATION
+	========================================================= */
+
+	function resetVisitorInformation() {
+		currentVisitor = null;
+		document.getElementById('visitorResult').classList.add('hidden');
+		document.getElementById('visitorStatus').textContent = '-';
+		document.getElementById('alreadyCheckedIn').classList.add('hidden');
+		document.getElementById('checkInArea').classList.add('hidden');
+		document.getElementById('visitorIdInput').value = '';
+	}
 
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        Visitor ID
-      </div>
-
-      <div
-        id="detailVisitorId"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        Unit Rumah
-      </div>
-
-      <div
-        id="detailUnit"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        Nama Penduduk
-      </div>
-
-      <div
-        id="detailResident"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        No. Telefon
-      </div>
-
-      <div
-        id="detailPhone"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        Jenis Pelawat
-      </div>
-
-      <div
-        id="detailVisitorType"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        Nama Pelawat
-      </div>
-
-      <div
-        id="detailVisitorName"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        No. Plat
-      </div>
-
-      <div
-        id="detailPlate"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        Jenis Kenderaan
-      </div>
-
-      <div
-        id="detailVehicle"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        Tujuan Lawatan
-      </div>
-
-      <div
-        id="detailPurpose"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        Valid From
-      </div>
-
-      <div
-        id="detailValidFrom"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <div class="detail-row">
-
-      <div class="detail-label">
-        Valid Until
-      </div>
-
-      <div
-        id="detailValidUntil"
-        class="detail-value"
-      >
-        -
-      </div>
-
-    </div>
-
-
-    <!-- CHECK IN -->
-
-    <div
-      id="checkInArea"
-      class="hidden"
-    >
-
-      <button
-        id="checkInBtn"
-        type="button"
-        class="btn-checkin"
-        onclick="checkInVisitor()"
-      >
-        CHECK IN
-      </button>
-
-    </div>
-
-
-    <!-- ALREADY CHECKED IN -->
-
-    <div
-      id="alreadyCheckedIn"
-      class="message warning hidden"
-    >
-      SUDAH CHECK IN
-    </div>
-
-  </div>
-
-
-  <!-- =====================================================
-       GLOBAL MESSAGE
-  ====================================================== -->
-
-  <div
-    id="globalMessage"
-    class="message hidden"
-  >
-  </div>
-
-
-  <div class="small-note">
-    Alam Idaman Visitor Management System
-  </div>
-
-
-</div>
-
-
-<script>
-
-
-/* =========================================================
-   API CONFIG
-========================================================= */
-
-const API_URL =
-  'https://script.google.com/macros/s/AKfycby9wbRoLvhfbOOS386zFsYE36vLdoyrGQ3eUq2V4hlZh0t2zKDUxkQK5bJQK319gzWScQ/exec';
-
-
-let scanner = null;
-
-let scanning = false;
-
-let scanLocked = false;
-
-let currentVisitor = null;
-
-
-/* =========================================================
-   PAGE LOAD
-========================================================= */
-
-window.addEventListener(
-  'load',
-  function() {
-
-    loadGuards();
-
-  }
-);
-
-
-/* =========================================================
-   LOAD GUARDS
-========================================================= */
-
-function loadGuards() {
-
-  const callbackName =
-    'guardCallback_' +
-    Date.now();
-
-  window[callbackName] =
-    function(response) {
-
-      try {
-
-        console.log(
-          'Guard API response:',
-          response
-        );
-
-        if (
-          !response ||
-          !response.success
-        ) {
-
-          showGlobalMessage(
-            response &&
-            response.message
-              ? response.message
-              : 'Senarai Guard tidak dapat dimuatkan.',
-            'error'
-          );
-
-          return;
-
-        }
-
-
-        const select =
-          document.getElementById(
-            'guardName'
-          );
-
-
-        if (!select) {
-          return;
-        }
-
-
-        select.innerHTML =
-          '<option value="">-- Pilih Guard --</option>';
-
-
-        const guards =
-          Array.isArray(
-            response.guards
-          )
-            ? response.guards
-            : [];
-
-
-        guards.forEach(
-          function(guard) {
-
-            const option =
-              document.createElement(
-                'option'
-              );
-
-            option.value =
-              guard;
-
-            option.textContent =
-              guard;
-
-            select.appendChild(
-              option
-            );
-
-          }
-        );
-
-
-        if (
-          guards.length === 0
-        ) {
-
-          showGlobalMessage(
-            'Tiada Guard dijumpai dalam sheet Guard.',
-            'warning'
-          );
-
-        }
-
-      }
-      finally {
-
-        delete window[
-          callbackName
-        ];
-
-
-        const script =
-          document.getElementById(
-            callbackName
-          );
-
-
-        if (script) {
-          script.remove();
-        }
-
-      }
-
-    };
-
-
-  loadApi(
-    'guards',
-    {},
-    callbackName
-  );
-
-}
-
-
-/* =========================================================
-   START CAMERA
-========================================================= */
-
-async function startScanner() {
-
-  if (scanning) {
-    return;
-  }
-
-  /*
-   * Hide previous visitor information
-   * before starting a new scan.
-   */
-  resetVisitorInformation();
-  
-  scanLocked = false;
-
-
-  setScannerMessage(
-    'Memulakan kamera...'
-  );
-
-
-  document.getElementById(
-    'startBtn'
-  ).disabled = true;
-
-
-  try {
-
-    if (
-      !window.isSecureContext
-    ) {
-
-      throw new Error(
-        'HTTPS_REQUIRED'
-      );
-
-    }
-
-
-    if (
-      !navigator.mediaDevices ||
-      !navigator.mediaDevices.getUserMedia
-    ) {
-
-      throw new Error(
-        'CAMERA_NOT_SUPPORTED'
-      );
-
-    }
-
-
-    /*
-     * Request camera permission.
-     */
-
-    const stream =
-      await navigator.mediaDevices.getUserMedia({
-
-        video: {
-          facingMode: {
-            ideal: 'environment'
-          }
-        },
-
-        audio: false
-
-      });
-
-
-    /*
-     * Stop temporary stream.
-     */
-
-    stream
-      .getTracks()
-      .forEach(
-        function(track) {
-          track.stop();
-        }
-      );
-
-
-    scanner =
-      new Html5Qrcode(
-        'reader'
-      );
-
-
-    const cameras =
-      await Html5Qrcode.getCameras();
-
-
-    if (
-      !cameras ||
-      cameras.length === 0
-    ) {
-
-      throw new Error(
-        'NO_CAMERA'
-      );
-
-    }
-
-
-    /*
-     * Default camera.
-     */
-
-    let cameraId =
-      cameras[0].id;
-
-
-    /*
-     * Try rear camera.
-     */
-
-    for (
-      let i = 0;
-      i < cameras.length;
-      i++
-    ) {
-
-      const label =
-        (
-          cameras[i].label ||
-          ''
-        ).toLowerCase();
-
-
-      if (
-        label.includes('back') ||
-        label.includes('rear') ||
-        label.includes('environment')
-      ) {
-
-        cameraId =
-          cameras[i].id;
-
-        break;
-
-      }
-
-    }
-
-
-    /*
-     * Start scanner.
-     */
-
-    await scanner.start(
-
-      cameraId,
-
-      {
-
-        fps: 10,
-
-        qrbox:
-          function(
-            width,
-            height
-          ) {
-
-            const minEdge =
-              Math.min(
-                width,
-                height
-              );
-
-
-            const size =
-              Math.min(
-                Math.floor(
-                  minEdge * 0.70
-                ),
-                300
-              );
-
-
-            return {
-
-              width:
-                size,
-
-              height:
-                size
-
-            };
-
-          },
-
-        aspectRatio: 1.0
-
-      },
-
-
-      function(decodedText) {
-
-        if (scanLocked) {
-          return;
-        }
-
-
-        if (!decodedText) {
-          return;
-        }
-
-
-        handleQrResult(
-          decodedText
-        );
-
-      },
-
-
-      function() {
-
-        /*
-         * Ignore scanning errors.
-         */
-
-      }
-
-    );
-
-
-    scanning = true;
-
-
-    document.getElementById(
-      'startBtn'
-    ).disabled = true;
-
-
-    document.getElementById(
-      'stopBtn'
-    ).disabled = false;
-
-
-    setScannerMessage(
-      'Kamera aktif. Halakan kamera ke QR Visitor Pass.'
-    );
-
-  }
-  catch (error) {
-
-    console.error(
-      'Camera error:',
-      error
-    );
-
-
-    scanning = false;
-
-
-    document.getElementById(
-      'startBtn'
-    ).disabled = false;
-
-
-    document.getElementById(
-      'stopBtn'
-    ).disabled = true;
-
-
-    let message =
-      'Kamera tidak dapat dimulakan.';
-
-
-    if (
-      error.message ===
-      'HTTPS_REQUIRED'
-    ) {
-
-      message =
-        'Scanner mesti menggunakan HTTPS.';
-
-    }
-    else if (
-      error.message ===
-      'CAMERA_NOT_SUPPORTED'
-    ) {
-
-      message =
-        'Browser tidak menyokong akses kamera.';
-
-    }
-    else if (
-      error.message ===
-      'NO_CAMERA'
-    ) {
-
-      message =
-        'Tiada kamera dikesan.';
-
-    }
-    else if (
-      error.name ===
-      'NotAllowedError'
-    ) {
-
-      message =
-        'Akses kamera ditolak. Sila benarkan Camera untuk Chrome.';
-
-    }
-    else if (
-      error.name ===
-      'NotReadableError'
-    ) {
-
-      message =
-        'Kamera sedang digunakan oleh aplikasi lain.';
-
-    }
-
-
-    setScannerMessage(
-      message
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   STOP CAMERA
-========================================================= */
-
-async function stopScanner() {
-
-  scanLocked = true;
-
-
-  if (
-    !scanner ||
-    !scanning
-  ) {
-
-    document.getElementById(
-      'startBtn'
-    ).disabled = false;
-
-
-    document.getElementById(
-      'stopBtn'
-    ).disabled = true;
-
-
-    return;
-
-  }
-
-
-  try {
-
-    await scanner.stop();
-
-  }
-  catch (error) {
-
-    console.error(
-      error
-    );
-
-  }
-
-
-  try {
-
-    scanner.clear();
-
-  }
-  catch (error) {
-
-    console.error(
-      error
-    );
-
-  }
-
-
-  scanner = null;
-
-  scanning = false;
-
-
-  document.getElementById(
-    'startBtn'
-  ).disabled = false;
-
-
-  document.getElementById(
-    'stopBtn'
-  ).disabled = true;
-
-
-  setScannerMessage(
-    'Scanner dihentikan.'
-  );
-
-}
-
-/* =========================================================
-   RESET VISITOR INFORMATION
-========================================================= */
-
-function resetVisitorInformation() {
-
-  currentVisitor = null;
-
-  document
-    .getElementById('visitorResult')
-    .classList.add('hidden');
-
-  document
-    .getElementById('visitorStatus')
-    .textContent = '-';
-
-  document
-    .getElementById('alreadyCheckedIn')
-    .classList.add('hidden');
-
-  document
-    .getElementById('checkInArea')
-    .classList.add('hidden');
-
-  document
-    .getElementById('visitorIdInput')
-    .value = '';
-
-}
-  
-/* =========================================================
-   QR RESULT
-========================================================= */
-
-function handleQrResult(
-  decodedText
-) {
-
-  if (scanLocked) {
-    return;
-  }
-
-
-  scanLocked = true;
-
-
-  const visitorId =
-    String(
-      decodedText || ''
-    ).trim();
-
-
-  /*
-   * QR mesti bermula dengan VIS-
-   */
-
-  if (
-    !visitorId.startsWith(
-      'VIS-'
-    )
-  ) {
-
-    scanLocked = false;
-
-
-    setScannerMessage(
-      'QR tidak sah. Sila gunakan QR Visitor Pass Alam Idaman.'
-    );
-
-
-    return;
-
-  }
-
-
-  /*
-   * Stop camera.
-   */
-
-  stopScanner();
-
-
-  /*
-   * Masukkan Visitor ID.
-   */
-
-  document.getElementById(
-    'visitorIdInput'
-  ).value =
-    visitorId;
-
-
-  /*
-   * Search visitor.
-   */
-
-  searchVisitor(
-    visitorId
-  );
-
-}
-
-
-/* =========================================================
-   SEARCH VISITOR
-========================================================= */
-
-function searchVisitor(
-  visitorId = ''
-) {
-
-  const input =
-    document.getElementById(
-      'visitorIdInput'
-    );
-
-
-  if (!visitorId) {
-
-    visitorId =
-      input.value.trim();
-
-  }
-
-
-  if (!visitorId) {
-
-    showGlobalMessage(
-      'Sila masukkan Visitor ID.',
-      'error'
-    );
-
-
-    return;
-
-  }
-
-
-  visitorId =
-    visitorId.toUpperCase();
-
-
-  input.value =
-    visitorId;
-
-
-  showGlobalMessage(
-    'Mencari Visitor ID...',
-    ''
-  );
-
-
-  const callbackName =
-    'visitorCallback_' +
-    Date.now();
-
-
-  window[callbackName] =
-    function(response) {
-
-      try {
-
-        if (
-          !response ||
-          !response.success
-        ) {
-
-          currentVisitor = null;
-
-
-          document
-            .getElementById(
-              'visitorResult'
-            )
-            .classList.add(
-              'hidden'
-            );
-
-
-          showGlobalMessage(
-            response &&
-            response.message
-              ? response.message
-              : 'Visitor tidak dijumpai.',
-            'error'
-          );
-
-
-          return;
-
-        }
-
-
-        currentVisitor =
-          response.visitor;
-
-
-        displayVisitor(
-          response.visitor
-        );
-
-
-        /*
-         * Rekod setiap scan selepas
-         * visitor berjaya dijumpai.
-         */
-
-        recordScan();
-
-
-
-      }
-      finally {
-
-        delete window[
-          callbackName
-        ];
-
-
-        const script =
-          document.getElementById(
-            callbackName
-          );
-
-
-        if (script) {
-          script.remove();
-        }
-
-      }
-
-    };
-
-
-  loadApi(
-    'visitor',
-    {
-      visitorId:
-        visitorId
-    },
-    callbackName
-  );
-
-}
-
-
-/* =========================================================
-   DISPLAY VISITOR
-========================================================= */
-
-function displayVisitor(visitor) {
-  document.getElementById('visitorResult').classList.remove('hidden');
-
-  document.getElementById('detailVisitorId').textContent = visitor.visitorId || '-';
-  document.getElementById('detailUnit').textContent = visitor.unit || '-';
-  document.getElementById('detailResident').textContent = visitor.residentName || '-';
-  document.getElementById('detailPhone').textContent = visitor.phone || '-';
-  document.getElementById('detailVisitorType').textContent = visitor.actualVisitorType || visitor.visitorType || '-';
-  document.getElementById('detailVisitorName').textContent = visitor.visitorName || '-';
-  document.getElementById('detailPlate').textContent = visitor.plate || '-';
-  document.getElementById('detailVehicle').textContent = visitor.vehicleType || '-';
-  document.getElementById('detailPurpose').textContent = visitor.purpose || '-';
-  document.getElementById('detailValidFrom').textContent = visitor.validFrom || '-';
-  document.getElementById('detailValidUntil').textContent = visitor.validUntil || '-';
-
-  const status = document.getElementById('visitorStatus');
-  const statusMessage = document.getElementById('visitorStatusMessage');
-
-  status.className = 'status';
-  statusMessage.className = 'message hidden';
-  statusMessage.textContent = '';
-
-  if (visitor.status === 'REJECTED') {
-    status.classList.add('status-expired');
-    status.textContent = 'REJECTED';
-    statusMessage.textContent = 'Pelawat ini tidak dibenarkan masuk oleh tuan rumah. Sila hubungi tuan rumah untuk maklumat lanjut.';
-    statusMessage.classList.add('error');
-    statusMessage.classList.remove('hidden');
-  } else if (visitor.status === 'EXPIRED') {
-    status.classList.add('status-expired');
-    status.textContent = 'EXPIRED';
-    statusMessage.textContent = 'QR Code ini telah tamat tempoh. Sila minta tuan rumah membuat pendaftaran pelawat baharu.';
-    statusMessage.classList.add('error');
-    statusMessage.classList.remove('hidden');
-  } else {
-    status.classList.add('status-valid');
-    status.textContent = 'VALID';
-    statusMessage.textContent = 'Pelawat dibenarkan masuk.';
-    statusMessage.classList.add('success');
-    statusMessage.classList.remove('hidden');
-  }
-
-  const checkInArea = document.getElementById('checkInArea');
-  const alreadyCheckedIn = document.getElementById('alreadyCheckedIn');
-
-  checkInArea.classList.add('hidden');
-  alreadyCheckedIn.classList.add('hidden');
-
-  if (visitor.status === 'REJECTED' || visitor.status === 'EXPIRED') {
-    return;
-  }
-
-  if (visitor.checkedIn) {
-    alreadyCheckedIn.classList.remove('hidden');
-  } else {
-    checkInArea.classList.remove('hidden');
-  }
-}
-
-/* =========================================================
-   RECORD SCAN
-========================================================= */
-
-function recordScan() {
-
-  if (!currentVisitor) {
-    return;
-  }
-
-
-  const guard =
-    document.getElementById(
-      'guardName'
-    ).value;
-
-
-  if (!guard) {
-
-    showGlobalMessage(
-      'Sila pilih nama Guard terlebih dahulu sebelum scan.',
-      'warning'
-    );
-
-    return;
-
-  }
-
-
-  const callbackName =
-    'scanCallback_' +
-    Date.now();
-
-
-  window[callbackName] =
-    function(response) {
-
-      try {
-
-        console.log(
-          'Scan Log response:',
-          response
-        );
-
-
-        if (
-          response &&
-          response.success
-        ) {
-
-          console.log(
-            'SCAN berjaya direkodkan.'
-          );
-
-        }
-        else {
-
-          console.warn(
-            response &&
-            response.message
-              ? response.message
-              : 'SCAN tidak direkodkan.'
-          );
-
-        }
-
-      }
-      finally {
-
-        delete window[
-          callbackName
-        ];
-
-
-        const script =
-          document.getElementById(
-            callbackName
-          );
-
-
-        if (script) {
-          script.remove();
-        }
-
-      }
-
-    };
-
-
-  loadApi(
-    'scan',
-    {
-      visitorId:
-        currentVisitor.visitorId,
-
-      guardName:
-        guard
-    },
-    callbackName
-  );
-
-}
-
-
-/* =========================================================
-   CHECK IN
-========================================================= */
-
-function checkInVisitor() {
-
-  if (!currentVisitor) {
-
-    showGlobalMessage(
-      'Tiada Visitor dipilih.',
-      'error'
-    );
-
-
-    return;
-
-  }
-
-
-  const guard =
-    document.getElementById(
-      'guardName'
-    ).value;
-
-
-  if (!guard) {
-
-    showGlobalMessage(
-      'Sila pilih nama Guard terlebih dahulu.',
-      'error'
-    );
-
-
-    return;
-
-  }
-
-
-  const button =
-    document.getElementById(
-      'checkInBtn'
-    );
-
-
-  button.disabled =
-    true;
-
-
-  button.textContent =
-    'PROCESSING...';
-
-
-  const callbackName =
-    'checkInCallback_' +
-    Date.now();
-
-
-  window[callbackName] =
-    function(response) {
-
-      try {
-
-        if (
-          response &&
-          response.success
-        ) {
-
-          currentVisitor.checkedIn =
-            true;
-
-
-          displayVisitor(
-            currentVisitor
-          );
-
-
-          showGlobalMessage(
-            '✓ Pelawat berjaya CHECK IN. Guard: ' +
-            guard,
-            'success'
-          );
-
-        }
-        else {
-
-          showGlobalMessage(
-            response &&
-            response.message
-              ? response.message
-              : 'CHECK IN gagal.',
-            'error'
-          );
-
-        }
-
-      }
-      finally {
-
-        button.disabled =
-          false;
-
-
-        button.textContent =
-          'CHECK IN';
-
-
-        delete window[
-          callbackName
-        ];
-
-
-        const script =
-          document.getElementById(
-            callbackName
-          );
-
-
-        if (script) {
-          script.remove();
-        }
-
-      }
-
-    };
-
-
-  loadApi(
-    'checkin',
-    {
-      visitorId:
-        currentVisitor.visitorId,
-
-      guardName:
-        guard
-    },
-    callbackName
-  );
-
-}
-
-
-/* =========================================================
-   API JSONP
-========================================================= */
-
-function loadApi(
-  api,
-  params,
-  callbackName
-) {
-
-  const query =
-    new URLSearchParams();
-
-
-  query.set(
-    'api',
-    api
-  );
-
-
-  query.set(
-    'callback',
-    callbackName
-  );
-
-
-  query.set(
-    '_',
-    Date.now()
-  );
-
-
-  Object.keys(
-    params || {}
-  )
-    .forEach(
-      function(key) {
-
-        query.set(
-          key,
-          params[key]
-        );
-
-      }
-    );
-
-
-  const script =
-    document.createElement(
-      'script'
-    );
-
-
-  script.id =
-    callbackName;
-
-
-  script.src =
-    API_URL +
-    '?' +
-    query.toString();
-
-
-  script.async = true;
-
-
-  script.onerror =
-    function() {
-
-      console.error(
-        'API request failed:',
-        api
-      );
-
-
-      if (
-        window[callbackName]
-      ) {
-
-        delete window[
-          callbackName
-        ];
-
-      }
-
-
-      if (
-        script.parentNode
-      ) {
-
-        script.parentNode.removeChild(
-          script
-        );
-
-      }
-
-    };
-
-
-  document.body.appendChild(
-    script
-  );
-
-}
-
-
-/* =========================================================
-   UI
-========================================================= */
-
-function setScannerMessage(
-  message
-) {
-
-  document.getElementById(
-    'scannerMessage'
-  ).textContent =
-    message;
-
-}
-
-
-function showGlobalMessage(
-  message,
-  type
-) {
-
-  const element =
-    document.getElementById(
-      'globalMessage'
-    );
-
-
-  element.textContent =
-    message;
-
-
-  element.className =
-    'message';
-
-
-  if (
-    type ===
-    'success'
-  ) {
-
-    element.classList.add(
-      'success'
-    );
-
-  }
-  else if (
-    type ===
-    'error'
-  ) {
-
-    element.classList.add(
-      'error'
-    );
-
-  }
-  else if (
-    type ===
-    'warning'
-  ) {
-
-    element.classList.add(
-      'warning'
-    );
-
-  }
-
-
-  element.classList.remove(
-    'hidden'
-  );
-
-}
-
-
-/* =========================================================
-   VISIBILITY
-========================================================= */
-
-document.addEventListener(
-  'visibilitychange',
-  function() {
-
-    if (
-      document.hidden &&
-      scanning
-    ) {
-
-      stopScanner();
-
-    }
-
-  }
-);
-
-
-</script>
+	   
+	/* =========================================================
+		QR RESULT
+	========================================================= */
+
+	function handleQrResult(decodedText) {
+		if (scanLocked) return;
+
+		scanLocked = true;
+
+		const visitorId = String(decodedText || '').trim();
+
+		if (!visitorId.startsWith('VIS-')) {
+			scanLocked = false;
+			setScannerMessage('QR tidak sah. Sila gunakan QR Visitor Pass Alam Idaman.');
+			return;
+		}
+
+		stopScanner();
+
+		document.getElementById('visitorIdInput').value = visitorId;
+		searchVisitor(visitorId);
+	}
+
+
+	/* =========================================================
+		SEARCH VISITOR
+	========================================================= */
+
+	function searchVisitor(visitorId = '') {
+		const input = document.getElementById('visitorIdInput');
+
+		if (!visitorId) visitorId = input.value.trim();
+
+		if (!visitorId) {
+			showGlobalMessage('Sila masukkan Visitor ID.', 'error');
+			return;
+		}
+
+		visitorId = visitorId.toUpperCase();
+		input.value = visitorId;
+
+		showGlobalMessage('Mencari Visitor ID...', '');
+
+		const callbackName = 'visitorCallback_' + Date.now();
+
+		window[callbackName] = function(response) {
+			try {
+				if (!response || !response.success) {
+					currentVisitor = null;
+					document.getElementById('visitorResult').classList.add('hidden');
+					showGlobalMessage(response && response.message ? response.message : 'Visitor tidak dijumpai.', 'error');
+					return;
+				}
+
+				currentVisitor = response.visitor;
+				displayVisitor(response.visitor);
+
+				recordScan();
+			}
+			finally {
+				delete window[callbackName];
+
+				const script = document.getElementById(callbackName);
+				if (script) script.remove();
+			}
+		};
+
+		loadApi('visitor', { visitorId: visitorId }, callbackName);
+	}
+
+
+	/* =========================================================
+		 DISPLAY VISITOR
+	========================================================= */
+
+	function displayVisitor(visitor) {
+		document.getElementById('visitorResult').classList.remove('hidden');
+
+		document.getElementById('detailVisitorId').textContent = visitor.visitorId || '-';
+		document.getElementById('detailUnit').textContent = visitor.unit || '-';
+		document.getElementById('detailResident').textContent = visitor.residentName || '-';
+		document.getElementById('detailPhone').textContent = visitor.phone || '-';
+		document.getElementById('detailVisitorType').textContent = visitor.actualVisitorType || visitor.visitorType || '-';
+		document.getElementById('detailVisitorName').textContent = visitor.visitorName || '-';
+		document.getElementById('detailPlate').textContent = visitor.plate || '-';
+		document.getElementById('detailVehicle').textContent = visitor.vehicleType || '-';
+		document.getElementById('detailPurpose').textContent = visitor.purpose || '-';
+		document.getElementById('detailValidFrom').textContent = visitor.validFrom || '-';
+		document.getElementById('detailValidUntil').textContent = visitor.validUntil || '-';
+
+		const status = document.getElementById('visitorStatus');
+		const statusMessage = document.getElementById('visitorStatusMessage');
+
+		status.className = 'status';
+		statusMessage.className = 'message hidden';
+		statusMessage.textContent = '';
+
+		if (visitor.status === 'REJECTED') {
+			status.classList.add('status-expired');
+			status.textContent = 'REJECTED';
+			statusMessage.textContent = 'Pelawat ini tidak dibenarkan masuk oleh tuan rumah. Sila hubungi tuan rumah untuk maklumat lanjut.';
+			statusMessage.classList.add('error');
+			statusMessage.classList.remove('hidden');
+		} else if (visitor.status === 'EXPIRED') {
+			status.classList.add('status-expired');
+			status.textContent = 'EXPIRED';
+			statusMessage.textContent = 'QR Code ini telah tamat tempoh. Sila minta tuan rumah membuat pendaftaran pelawat baharu.';
+			statusMessage.classList.add('error');
+			statusMessage.classList.remove('hidden');
+		} else {
+			status.classList.add('status-valid');
+			status.textContent = 'VALID';
+			statusMessage.textContent = 'Pelawat dibenarkan masuk.';
+			statusMessage.classList.add('success');
+			statusMessage.classList.remove('hidden');
+		}
+
+		const checkInArea = document.getElementById('checkInArea');
+		const alreadyCheckedIn = document.getElementById('alreadyCheckedIn');
+
+		checkInArea.classList.add('hidden');
+		alreadyCheckedIn.classList.add('hidden');
+
+		if (visitor.status === 'REJECTED' || visitor.status === 'EXPIRED') {
+			return;
+		}
+
+		if (visitor.checkedIn) {
+			alreadyCheckedIn.classList.remove('hidden');
+		} else {
+			checkInArea.classList.remove('hidden');
+		}
+	}
+
+	/* =========================================================
+		RECORD SCAN
+	========================================================= */
+
+	function recordScan() {
+		if (!currentVisitor) return;
+
+		const guard = document.getElementById('guardName').value;
+
+		if (!guard) {
+			showGlobalMessage('Sila pilih nama Guard terlebih dahulu sebelum scan.', 'warning');
+			return;
+		}
+
+		const callbackName = 'scanCallback_' + Date.now();
+
+		window[callbackName] = function(response) {
+			try {
+				console.log('Scan Log response:', response);
+
+				if (response && response.success) {
+					console.log('SCAN berjaya direkodkan.');
+				}
+				else {
+					console.warn(response && response.message ? response.message : 'SCAN tidak direkodkan.');
+				}
+			}
+			finally {
+				delete window[callbackName];
+
+				const script = document.getElementById(callbackName);
+				if (script) script.remove();
+			}
+		};
+
+		loadApi('scan', {
+			visitorId: currentVisitor.visitorId,
+			guardName: guard
+		}, callbackName);
+	}
+
+
+	/* =========================================================
+		CHECK IN
+	========================================================= */
+
+	function checkInVisitor() {
+		if (!currentVisitor) {
+			showGlobalMessage('Tiada Visitor dipilih.', 'error');
+			return;
+		}
+
+		const guard = document.getElementById('guardName').value;
+
+		if (!guard) {
+			showGlobalMessage('Sila pilih nama Guard terlebih dahulu.', 'error');
+			return;
+		}
+
+		const button = document.getElementById('checkInBtn');
+		button.disabled = true;
+		button.textContent = 'PROCESSING...';
+
+		const callbackName = 'checkInCallback_' + Date.now();
+
+		window[callbackName] = function(response) {
+			try {
+				if (response && response.success) {
+					currentVisitor.checkedIn = true;
+					displayVisitor(currentVisitor);
+					showGlobalMessage('✓ Pelawat berjaya CHECK IN. Guard: ' + guard, 'success');
+				}
+				else {
+					showGlobalMessage(response && response.message ? response.message : 'CHECK IN gagal.', 'error');
+				}
+			}
+			finally {
+				button.disabled = false;
+				button.textContent = 'CHECK IN';
+				delete window[callbackName];
+
+				const script = document.getElementById(callbackName);
+				if (script) script.remove();
+			}
+		};
+
+		loadApi('checkin', {
+			visitorId: currentVisitor.visitorId,
+			guardName: guard
+		}, callbackName);
+	}
+
+
+	/* =========================================================
+		API JSONP
+	========================================================= */
+
+	function loadApi(api, params, callbackName) {
+		const query = new URLSearchParams();
+
+		query.set('api', api);
+		query.set('callback', callbackName);
+		query.set('_', Date.now());
+
+		Object.keys(params || {}).forEach(function(key) {
+			query.set(key, params[key]);
+		});
+
+		const script = document.createElement('script');
+		script.id = callbackName;
+		script.src = API_URL + '?' + query.toString();
+		script.async = true;
+
+		script.onerror = function() {
+			console.error('API request failed:', api);
+
+			if (window[callbackName]) delete window[callbackName];
+			if (script.parentNode) script.parentNode.removeChild(script);
+		};
+
+		document.body.appendChild(script);
+	}
+
+
+	/* =========================================================
+		UI
+	========================================================= */
+
+	function setScannerMessage(message) {
+		document.getElementById('scannerMessage').textContent = message;
+	}
+
+	function showGlobalMessage(message, type) {
+		const element = document.getElementById('globalMessage');
+
+		element.textContent = message;
+		element.className = 'message';
+
+		if (type === 'success') {
+			element.classList.add('success');
+		}
+		else if (type === 'error') {
+			element.classList.add('error');
+		}
+		else if (type === 'warning') {
+			element.classList.add('warning');
+		}
+
+		element.classList.remove('hidden');
+	}
+
+
+	/* =========================================================
+		VISIBILITY
+	========================================================= */
+
+	document.addEventListener('visibilitychange', function() {
+		if (document.hidden && scanning) {
+			stopScanner();
+		}
+	});
+
+
+	</script>
 
 </body>
 
