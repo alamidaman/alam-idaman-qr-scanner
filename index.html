@@ -299,9 +299,10 @@
     const API_URL =
       'https://script.google.com/macros/s/AKfycby9wbRoLvhfbOOS386zFsYE36vLdoyrGQ3eUq2V4hlZh0t2zKDUxkQK5bJQK319gzWScQ/exec';
 
-    let scanner = null;
-    let scanning = false;
-    let scanLocked = false;
+    const GUARD_NAME   = 'AI GUARD';    
+    let scanner        = null;
+    let scanning       = false;
+    let scanLocked     = false;
     let currentVisitor = null;
 
     /* =========================================================
@@ -622,84 +623,92 @@
        RECORD SCAN - NO GUARD NAME
     ========================================================= */
 
+    
     function recordScan() {
-      if (!currentVisitor) return;
-
-      const callbackName = 'scanCallback_' + Date.now();
-
-      window[callbackName] = function(response) {
-        try {
-          console.log('Scan Log response:', response);
-
-          if (response && response.success) {
-            console.log('SCAN berjaya direkodkan.');
-          } else {
-            console.warn(
-              response && response.message
-                ? response.message
-                : 'SCAN tidak direkodkan.'
-            );
-          }
-        } finally {
-          delete window[callbackName];
-
-          const script = document.getElementById(callbackName);
-          if (script) script.remove();
-        }
-      };
-
-      loadApi('scan', {
-        visitorId: currentVisitor.visitorId
-      }, callbackName);
+        if (!currentVisitor) return;
+    
+        const callbackName = 'scanCallback_' + Date.now();
+    
+        window[callbackName] = function(response) {
+            try {
+                console.log('Scan Log response:', response);
+    
+                if (response && response.success) {
+                    console.log('SCAN berjaya direkodkan.');
+                } else {
+                    console.warn(
+                        response && response.message
+                            ? response.message
+                            : 'SCAN tidak direkodkan.'
+                    );
+                }
+            } finally {
+                delete window[callbackName];
+    
+                const script = document.getElementById(callbackName);
+                if (script) script.remove();
+            }
+        };
+    
+        loadApi('scan', {
+            visitorId: currentVisitor.visitorId,
+            guardName: GUARD_NAME
+        }, callbackName);
     }
+
 
     /* =========================================================
        CHECK IN - NO GUARD NAME
     ========================================================= */
-
+    
     function checkInVisitor() {
-      if (!currentVisitor) {
-        showGlobalMessage('Tiada Visitor dipilih.', 'error');
-        return;
-      }
-
-      const button = document.getElementById('checkInBtn');
-
-      button.disabled = true;
-      button.textContent = 'PROCESSING...';
-
-      const callbackName = 'checkInCallback_' + Date.now();
-
-      window[callbackName] = function(response) {
-        try {
-          if (response && response.success) {
-            currentVisitor.checkedIn = true;
-            displayVisitor(currentVisitor);
-
-            showGlobalMessage('✓ Pelawat berjaya CHECK IN.', 'success');
-          } else {
-            showGlobalMessage(
-              response && response.message
-                ? response.message
-                : 'CHECK IN gagal.',
-              'error'
-            );
-          }
-        } finally {
-          button.disabled = false;
-          button.textContent = 'CHECK IN';
-
-          delete window[callbackName];
-
-          const script = document.getElementById(callbackName);
-          if (script) script.remove();
+        if (!currentVisitor) {
+            showGlobalMessage('Tiada Visitor dipilih.', 'error');
+            return;
         }
-      };
-
-      loadApi('checkin', {
-        visitorId: currentVisitor.visitorId
-      }, callbackName);
+    
+        const button = document.getElementById('checkInBtn');
+    
+        button.disabled = true;
+        button.textContent = 'PROCESSING...';
+    
+        const callbackName = 'checkInCallback_' + Date.now();
+    
+        window[callbackName] = function(response) {
+            try {
+                if (response && response.success) {
+                    currentVisitor.checkedIn = true;
+                    displayVisitor(currentVisitor);
+    
+                    showGlobalMessage(
+                        '✓ Pelawat berjaya CHECK IN. Guard: ' + GUARD_NAME,
+                        'success'
+                    );
+                } else {
+                    showGlobalMessage(
+                        response && response.message
+                            ? response.message
+                            : 'CHECK IN gagal.',
+                        'error'
+                    );
+                }
+            } finally {
+                button.disabled = false;
+                button.textContent = 'CHECK IN';
+    
+                delete window[callbackName];
+    
+                const script = document.getElementById(callbackName);
+                if (script) script.remove();
+            }
+        };
+    
+        loadApi('checkin', {
+            visitorId: currentVisitor.visitorId,
+            guardName: GUARD_NAME
+        }, callbackName);
     }
+
 
     /* =========================================================
        API JSONP
