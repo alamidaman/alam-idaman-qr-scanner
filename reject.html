@@ -408,9 +408,13 @@
 			window[callbackName] = function(response) {
 				try {
 					if (response && response.success) {
-						currentVisitor.status = 'REJECTED';
-						displayVisitor(currentVisitor);
-						showGlobalMessage('Pelawat telah berjaya ditolak.', 'success');
+					    currentVisitor.status = 'REJECTED';
+					    displayVisitor(currentVisitor);
+					
+					    showGlobalMessage(
+					        response.message || 'Pelawat berjaya ditolak.',
+					        response.emailSent === false ? 'warning' : 'success'
+					    );
 					}
 					else {
 						button.disabled = false;
