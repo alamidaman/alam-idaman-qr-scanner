@@ -211,7 +211,39 @@
     <div class="card">
       <div class="section-title">Manual Visitor ID</div>
       <input id="visitorIdInput" type="text" placeholder="VIS-20261007-83BE0226" autocomplete="off">
-      <button type="button" onclick="searchVisitor()">SEARCH VISITOR</button>
+      <button type="button" onclick="()">SEARCH VISITOR</button>
+    </div>
+    
+    <!-- OPEN HOUSE RESULT -->
+    <div id="openHouseResult" class="card hidden">
+      <div class="section-title">Open House Information</div>
+    
+      <div class="detail-row">
+        <div class="detail-label">Open House ID</div>
+        <div id="ohDetailId" class="detail-value">-</div>
+      </div>
+    
+      <div class="detail-row">
+        <div class="detail-label">Nama Tuan Rumah</div>
+        <div id="ohDetailOwner" class="detail-value">-</div>
+      </div>
+    
+      <div class="detail-row">
+        <div class="detail-label">Unit Rumah</div>
+        <div id="ohDetailUnit" class="detail-value">-</div>
+      </div>
+    
+      <div class="detail-row">
+        <div class="detail-label">Tarikh Open House</div>
+        <div id="ohDetailDate" class="detail-value">-</div>
+      </div>
+    
+      <div class="section-title">Maklumat Kenderaan</div>
+    
+      <label for="ohPlateInput">Nombor Plat Kenderaan</label>
+      <input id="ohPlateInput" type="text" placeholder="Contoh: ABC1234" autocomplete="off" style="text-transform: uppercase;">
+    
+      <button id="ohRecordBtn" type="button" onclick="recordOpenHouseScan()">REKOD OPEN HOUSE</button>
     </div>
 
     <!-- VISITOR RESULT -->
@@ -475,7 +507,7 @@
       if (visitorId.startsWith('VIS-')) {
         stopScanner();
         document.getElementById('visitorIdInput').value = visitorId;
-        searchVisitor(visitorId);
+        (visitorId);
         return;
       }
     
