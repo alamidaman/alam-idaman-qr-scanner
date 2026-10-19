@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -210,8 +209,8 @@
     <!-- MANUAL SEARCH -->
     <div class="card">
       <div class="section-title">Manual Visitor ID</div>
-      <input id="visitorIdInput" type="text" placeholder="VIS-20261007-83BE0226" autocomplete="off">
-      <button type="button" onclick="()">SEARCH VISITOR</button>
+      <input id="visitorIdInput" type="text" placeholder="VIS-20261007-83BE0226" autocomplete="off">      
+      <button type="button" onclick="searchById()">SEARCH VISITOR</button>
     </div>
     
     <!-- OPEN HOUSE RESULT -->
@@ -527,6 +526,22 @@
     /* =========================================================
        SEARCH VISITOR
     ========================================================= */
+    
+    function searchById() {
+      const input = document.getElementById('visitorIdInput');
+      const id = input.value.trim().toUpperCase();
+    
+      if (id.startsWith('VIS-')) {
+        searchVisitor(id);
+      } else if (id.startsWith('OH-')) {
+        searchOpenHouse(id);
+      } else {
+        showGlobalMessage(
+          'ID tidak sah. Masukkan ID VIS- atau OH-.',
+          'error'
+        );
+      }
+    }
 
     function searchVisitor(visitorId = '') {
       const input = document.getElementById('visitorIdInput');
