@@ -489,6 +489,7 @@
       document.getElementById('visitorStatus').textContent = '-';
       document.getElementById('alreadyCheckedIn').classList.add('hidden');
       document.getElementById('checkInArea').classList.add('hidden');
+      document.getElementById('openHouseResult').classList.add('hidden');
       document.getElementById('visitorIdInput').value = '';
     }
 
@@ -635,6 +636,7 @@
       window[callbackName] = function(response) {
         try {
           if (!response || !response.success || !response.openHouse) {
+            document.getElementById('openHouseResult').classList.add('hidden');
             showGlobalMessage(
               response && response.message
                 ? response.message
