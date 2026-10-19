@@ -226,7 +226,12 @@
         <div class="detail-label">Nama Tuan Rumah</div>
         <div id="ohDetailOwner" class="detail-value">-</div>
       </div>
-    
+
+      <div class="detail-row">
+        <div class="detail-label">No. Telefon</div>
+        <div id="ohDetailPhone" class="detail-value">-</div>
+      </div>
+      
       <div class="detail-row">
         <div class="detail-label">Unit Rumah</div>
         <div id="ohDetailUnit" class="detail-value">-</div>
@@ -653,7 +658,10 @@
     
           document.getElementById('ohDetailOwner').textContent =
             oh.ownerName || '-';
-    
+
+          document.getElementById('ohDetailPhone').textContent =
+            oh.unit || '-';
+          
           document.getElementById('ohDetailUnit').textContent =
             oh.unit || '-';
     
