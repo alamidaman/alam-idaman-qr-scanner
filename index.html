@@ -464,25 +464,34 @@
     /* =========================================================
        QR RESULT
     ========================================================= */
-
+    
     function handleQrResult(decodedText) {
       if (scanLocked) return;
-
+    
       scanLocked = true;
-
+    
       const visitorId = String(decodedText || '').trim();
-
-      if (!visitorId.startsWith('VIS-')) {
-        scanLocked = false;
-        setScannerMessage('QR tidak sah. Sila gunakan QR Visitor Pass Alam Idaman.');
+    
+      if (visitorId.startsWith('VIS-')) {
+        stopScanner();
+        document.getElementById('visitorIdInput').value = visitorId;
+        searchVisitor(visitorId);
         return;
       }
-
-      stopScanner();
-
-      document.getElementById('visitorIdInput').value = visitorId;
-      searchVisitor(visitorId);
+    
+      if (visitorId.startsWith('OH-')) {
+        stopScanner();
+        document.getElementById('visitorIdInput').value = visitorId;
+        searchOpenHouse(visitorId);
+        return;
+      }
+    
+      scanLocked = false;
+      setScannerMessage(
+        'QR tidak sah. Sila gunakan QR Visitor Pass atau Open House Alam Idaman.'
+      );
     }
+
 
     /* =========================================================
        SEARCH VISITOR
