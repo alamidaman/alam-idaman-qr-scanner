@@ -226,15 +226,15 @@
         <div class="detail-label">Nama Tuan Rumah</div>
         <div id="ohDetailOwner" class="detail-value">-</div>
       </div>
+    
+      <div class="detail-row">
+        <div class="detail-label">Unit Rumah</div>
+        <div id="ohDetailUnit" class="detail-value">-</div>
+      </div>
 
       <div class="detail-row">
         <div class="detail-label">No. Telefon</div>
         <div id="ohDetailPhone" class="detail-value">-</div>
-      </div>
-      
-      <div class="detail-row">
-        <div class="detail-label">Unit Rumah</div>
-        <div id="ohDetailUnit" class="detail-value">-</div>
       </div>
     
       <div class="detail-row">
@@ -242,10 +242,10 @@
         <div id="ohDetailDate" class="detail-value">-</div>
       </div>
     
-      <div class="section-title" style="margin-top: 12px;">Maklumat Kenderaan</div>
+      <div class="section-title">Maklumat Kenderaan</div>
     
       <label for="ohPlateInput">Nombor Plat Kenderaan</label>
-      <input id="ohPlateInput" type="text" placeholder="Contoh: ABC1234" autocomplete="off" style="text-transform: uppercase;margin-top: 12px">
+      <input id="ohPlateInput" type="text" placeholder="Contoh: ABC1234" autocomplete="off" style="text-transform: uppercase;">
     
       <button id="ohRecordBtn" type="button" onclick="recordOpenHouseScan()">REKOD OPEN HOUSE</button>
     </div>
@@ -658,12 +658,12 @@
     
           document.getElementById('ohDetailOwner').textContent =
             oh.ownerName || '-';
-
-          document.getElementById('ohDetailPhone').textContent =
-            oh.unit || '-';
-          
+    
           document.getElementById('ohDetailUnit').textContent =
             oh.unit || '-';
+
+          document.getElementById('ohDetailPhone').textContent =
+            oh.phone || '-';
     
           document.getElementById('ohDetailDate').textContent =
             oh.eventDate || '-';
