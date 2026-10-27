@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102d4d">
+  <title>Login PPAI | Alam Idaman</title>
+
+  <style>
+    :root {
+      --navy: #102d4d;
+      --blue: #245a91;
+      --text: #1c2d40;
+      --muted: #65758a;
+      --background: #f3f6fa;
+      --border: #e1e8f0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background: var(--background);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: var(--navy);
+      color: white;
+    }
+
+    .header-inner {
+      max-width: 1120px;
+      width: 100%;
+      margin: auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      padding: 5px;
+      object-fit: contain;
+      background: white;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .brand h1 {
+      margin: 0 0 5px;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    .brand p {
+      margin: 0;
+      color: #d6e4f2;
+      font-size: 12px;
+    }
+
+    .main {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 36px 18px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 8px 26px rgba(16, 45, 77, .07);
+    }
+
+    .login-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      background: #e7efff;
+      font-size: 28px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      color: var(--navy);
+      font-size: 27px;
+    }
+
+    .description {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    label {
+      display: block;
+      margin: 17px 0 8px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      min-height: 47px;
+      padding: 12px;
+      border: 1px solid #ccd7e3;
+      border-radius: 9px;
+      background: white;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    input:focus {
+      outline: 2px solid #9cbce0;
+      border-color: var(--blue);
+    }
+
+    .button {
+      width: 100%;
+      min-height: 49px;
+      margin-top: 24px;
+      padding: 13px 18px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--navy);
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .button:hover { background: var(--blue); }
+
+    .button:disabled {
+      opacity: .65;
+      cursor: wait;
+    }
+
+    .message {
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 22px;
+      color: var(--blue);
+      text-align: center;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+
+    .footer {
+      padding: 22px 18px;
+      background: var(--navy);
+      color: #d5e2ef;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .footer strong { color: white; }
+
+    @media (max-width: 480px) {
+      .header-inner { padding: 15px 18px; }
+      .logo { width: 52px; height: 52px; }
+      .brand h1 { font-size: 19px; }
+      .brand p { font-size: 10px; }
+      .login-card { padding: 25px 21px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <img src="logo.png" alt="Logo Alam Idaman" class="logo">
+
+      <div class="brand">
+        <h1>ALAM IDAMAN</h1>
+        <p>PORTAL PENGURUSAN PPAI</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="login-card">
+      <div class="login-icon" aria-hidden="true">🔐</div>
+
+      <h2>Login PPAI</h2>
+
+      <p class="description">
+        Halaman akses untuk AJK dan pengguna yang diberi kebenaran.
+        Sila masukkan maklumat akaun anda.
+      </p>
+
+      <form id="loginForm">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          name="username"
+          type="text"
+          autocomplete="username"
+          required
+        >
+
+        <label for="password">Kata laluan</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
+
+        <button class="button" id="loginButton" type="submit">
+          LOGIN
+        </button>
+
+        <p class="message" id="message" role="status" aria-live="polite"></p>
+      </form>
+
+      <a class="back-link" href="index.html">
+        ← Kembali ke Portal Alam Idaman
+      </a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <strong>ALAM IDAMAN</strong><br>
+    Visitor Management System (VMS)<br>
+    Akses terhad kepada pengguna yang dibenarkan.
+  </footer>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      document.getElementById('message').textContent =
+        'Sambungan pengesahan belum dikonfigurasi. Sila cuba semula selepas backend diaktifkan.';
+    });
+  </script>
+</body>
+</html>
