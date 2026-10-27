@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carian No. Plat | Alam Idaman</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f1f5f9;
+      color: #172033;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 25px auto;
+    }
+
+    .header {
+      background: #123b65;
+      color: white;
+      padding: 24px;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .header p {
+      margin: 0;
+      opacity: .85;
+      font-size: 14px;
+    }
+
+    .search-box, .results {
+      background: white;
+      padding: 22px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      min-width: 0;
+      flex: 1;
+      padding: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 13px 20px;
+      background: #1769aa;
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    #status {
+      margin: 18px 0;
+      color: #475569;
+      font-size: 14px;
+    }
+
+    .record {
+      border: 1px solid #dbe4ee;
+      border-radius: 12px;
+      margin: 14px 0;
+      overflow: hidden;
+    }
+
+    .record-title {
+      background: #eaf2fa;
+      padding: 14px 16px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .record-body { padding: 8px 16px; }
+
+    .field {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 11px 0;
+      border-bottom: 1px solid #edf0f4;
+    }
+
+    .field:last-child { border-bottom: 0; }
+
+    .label {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .value {
+      text-align: right;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .empty {
+      color: #64748b;
+      text-align: center;
+      padding: 24px 0;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 10px; }
+      .container { margin: 8px auto; }
+      .search-box { flex-direction: column; }
+      button { width: 100%; }
+      .field { flex-direction: column; gap: 5px; }
+      .value { text-align: left; }
+      .header h1 { font-size: 21px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header class="header">
+      <h1>Carian No. Plat</h1>
+      <p>Alam Idaman · Sistem Maklumat Pelawat</p>
+    </header>
+
+    <form class="search-box" id="searchForm">
+      <input
+        id="plateInput"
+        type="text"
+        placeholder="Contoh: VAB1234"
+        autocomplete="off"
+        required
+      >
+      <button id="searchButton" type="submit">Cari</button>
+    </form>
+
+    <section class="results">
+      <div id="status" role="status">Masukkan nombor plat untuk membuat carian.</div>
+      <div id="resultsList"></div>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = 'PASTE_WEB_APP_URL_HERE';
+
+    const form = document.getElementById('searchForm');
+    const input = document.getElementById('plateInput');
+    const button = document.getElementById('searchButton');
+    const statusBox = document.getElementById('status');
+    const resultsList = document.getElementById('resultsList');
+
+    function normalizePlate(value) {
+      return value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+
+    function addField(container, label, value) {
+      const row = document.createElement('div');
+      row.className = 'field';
+
+      const labelElement = document.createElement('div');
+      labelElement.className = 'label';
+      labelElement.textContent = label;
+
+      const valueElement = document.createElement('div');
+      valueElement.className = 'value';
+      valueElement.textContent = value || '—';
+
+      row.append(labelElement, valueElement);
+      container.appendChild(row);
+    }
+
+    function showRecords(records) {
+      resultsList.replaceChildren();
+
+      records.forEach(function (record) {
+        const card = document.createElement('article');
+        card.className = 'record';
+
+        const title = document.createElement('div');
+        title.className = 'record-title';
+        title.textContent = record.plate || 'No. Plat';
+
+        const type = document.createElement('span');
+        type.textContent = record.recordType || '';
+        title.appendChild(type);
+
+        const body = document.createElement('div');
+        body.className = 'record-body';
+
+        addField(body, 'Unit Rumah', record.unit);
+
+        // Nama Pelawat hanya untuk rekod pelawat biasa.
+        if (record.recordType === 'Pelawat Biasa') {
+          addField(body, 'Nama Pelawat', record.visitorName);
+        }
+
+        addField(body, 'Nama Owner', record.ownerName);
+        addField(body, 'Phone Owner', record.ownerPhone);
+        addField(body, 'No. Plate', record.plate);
+        addField(body, 'Jenis Kenderaan', record.vehicleType);
+        addField(body, 'Scan Terakhir', record.lastScan);
+
+        card.append(title, body);
+        resultsList.appendChild(card);
+      });
+    }
+
+    function jsonpSearch(plate) {
+      return new Promise(function (resolve, reject) {
+        const callbackName =
+          'plateCallback_' + Date.now() + '_' +
+          Math.random().toString(36).slice(2);
+
+        const script = document.createElement('script');
+        const timeout = setTimeout(function () {
+          cleanup();
+          reject(new Error('Carian mengambil masa terlalu lama. Cuba lagi.'));
+        }, 20000);
+
+        function cleanup() {
+          clearTimeout(timeout);
+          delete window[callbackName];
+          script.remove();
+        }
+
+        window[callbackName] = function (data) {
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = function () {
+          cleanup();
+          reject(new Error('Tidak dapat menghubungi API. Semak URL Web app.'));
+        };
+
+        const url = new URL(API_URL);
+        url.searchParams.set('action', 'searchPlate');
+        url.searchParams.set('plate', plate);
+        url.searchParams.set('callback', callbackName);
+
+        script.src = url.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const plate = normalizePlate(input.value);
+
+      if (!plate) {
+        statusBox.textContent = 'Sila masukkan nombor plat.';
+        return;
+      }
+
+      if (API_URL === 'PASTE_WEB_APP_URL_HERE') {
+        statusBox.textContent = 'URL API belum ditetapkan.';
+        return;
+      }
+
+      button.disabled = true;
+      statusBox.textContent = 'Sedang mencari...';
+      resultsList.replaceChildren();
+
+      try {
+        const data = await jsonpSearch(plate);
+
+        if (!data.success) {
+          throw new Error(data.message || 'Carian gagal.');
+        }
+
+        statusBox.textContent = data.message;
+
+        if (data.records.length) {
+          showRecords(data.records);
+        } else {
+          const empty = document.createElement('div');
+          empty.className = 'empty';
+          empty.textContent = 'Tiada rekod untuk nombor plat ini.';
+          resultsList.appendChild(empty);
+        }
+      } catch (error) {
+        statusBox.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
