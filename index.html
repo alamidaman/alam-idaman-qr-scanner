@@ -331,6 +331,48 @@
                 gap: 11px;
             }
         }
+		
+		.brand p {
+			margin: 0;
+			color: #d6e4f2;
+			font-size: 13px;
+			letter-spacing: .5px;
+		}		
+		
+		/* LOGIN PPAI */
+		.login-link {
+			margin-left: auto;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			min-height: 44px;
+			padding: 11px 18px;
+			border: 1px solid rgba(255, 255, 255, .55);
+			border-radius: 10px;
+			color: white;
+			background: rgba(255, 255, 255, .10);
+			font-size: 13px;
+			font-weight: bold;
+			white-space: nowrap;
+			transition: background .2s;
+		}
+
+		.login-link:hover {
+			background: rgba(255, 255, 255, .20);
+		}
+
+		@media (max-width: 650px) {
+			.header-inner {
+				flex-wrap: wrap;
+			}
+
+			.login-link {
+				width: 100%;
+				margin-left: 0;
+			}
+		}
+
     </style>
 </head>
 
@@ -339,16 +381,17 @@
     <!-- HEADER / LOGO -->
     <header class="header">
         <div class="header-inner">
-            <img
-                src="logo.png"
-                alt="Logo Alam Idaman"
-                class="logo"
-            >
+            <img src="logo.png" alt="Logo Alam Idaman" class="logo">
+            
+			<div class="brand">
+				<h1>ALAM IDAMAN</h1>
+				<p>PORTAL PENDAFTARAN PELAWAT</p>
+			</div>
 
-            <div class="brand">
-                <h1>ALAM IDAMAN</h1>
-                <p>PORTAL PENDAFTARAN PELAWAT</p>
-            </div>
+			<a class="login-link" href="login.html">
+				🔐 LOGIN PPAI <span aria-hidden="true">→</span>
+			</a>
+
         </div>
     </header>
 
