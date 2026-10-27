@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102d4d">
+<title>Pengurusan Kenderaan | Alam Idaman</title>
+<style>
+        :root {
+            --navy: #102d4d;
+            --blue: #245a91;
+            --green: #187044;
+            --red: #b42318;
+            --text: #1c2d40;
+            --muted: #65758a;
+            --background: #f3f6fa;
+            --border: #e1e8f0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        a { text-decoration: none; }
+
+        .header {
+            background: var(--navy);
+            color: white;
+        }
+
+        .header-inner {
+            max-width: 1120px;
+            margin: auto;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 66px;
+            height: 66px;
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .brand h1 {
+            font-size: 23px;
+            margin: 0 0 5px;
+            letter-spacing: 1px;
+        }
+
+        .brand p {
+            margin: 0;
+            color: #d6e4f2;
+            font-size: 13px;
+            letter-spacing: .5px;
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 10px 14px;
+            border: 1px solid rgba(255,255,255,.55);
+            border-radius: 10px;
+            color: white;
+            background: rgba(255,255,255,.10);
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .banner {
+            position: relative;
+            height: 260px;
+            overflow: hidden;
+            background: #183c60;
+        }
+
+        .banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(
+                90deg,
+                rgba(8,29,52,.76),
+                rgba(8,29,52,.22)
+            );
+        }
+
+        .banner-content {
+            color: white;
+            max-width: 760px;
+        }
+
+        .banner-content h2 {
+            font-size: clamp(28px,4vw,43px);
+            margin: 0 0 12px;
+        }
+
+        .banner-content p {
+            font-size: 15px;
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1120px;
+            margin: auto;
+            padding: 35px 24px 45px;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .section-heading h2 {
+            color: var(--navy);
+            font-size: 27px;
+            margin: 0 0 10px;
+        }
+
+        .section-heading p {
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 22px;
+            margin-bottom: 22px;
+            box-shadow: 0 8px 26px rgba(16,45,77,.04);
+        }
+
+        .panel h3 {
+            color: var(--navy);
+            margin: 0 0 17px;
+            font-size: 19px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        input, select {
+            width: 100%;
+            min-width: 0;
+            padding: 12px 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid #b8d4f1;
+            border-color: var(--blue);
+        }
+
+        .search-row input { flex: 1; }
+
+        button {
+            border: 0;
+            border-radius: 8px;
+            padding: 12px 18px;
+            background: var(--blue);
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: .55;
+            cursor: wait;
+        }
+
+        .btn-green { background: var(--green); }
+        .btn-light { background: #e8eef5; color: var(--navy); }
+        .btn-red { background: var(--red); }
+
+        .status-message {
+            margin-top: 14px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--muted);
+            overflow-wrap: anywhere;
+        }
+
+        .status-message.error { color: var(--red); }
+        .status-message.success { color: var(--green); }
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #edf0f4;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            color: var(--navy);
+            background: #f5f8fc;
+            white-space: nowrap;
+        }
+
+        td { overflow-wrap: anywhere; }
+
+        .unit {
+            font-weight: bold;
+            color: var(--navy);
+            white-space: nowrap;
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 20px;
+            padding: 5px 9px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            background: #edf1f5;
+            color: #475569;
+        }
+
+        .badge.paid, .badge.valid {
+            background: #e2f5e9;
+            color: #187044;
+        }
+
+        .badge.temp {
+            background: #fff0d5;
+            color: #895900;
+        }
+
+        .badge.not-paid {
+            background: #fee4e2;
+            color: #b42318;
+        }
+
+        .edit-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .empty {
+            padding: 24px 10px;
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 17px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--navy);
+        }
+
+        .readonly {
+            background: #edf1f5;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .help {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+
+        .footer {
+            background: var(--navy);
+            color: #d5e2ef;
+            text-align: center;
+            padding: 23px 18px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .footer strong { color: white; }
+
+        @media (max-width: 760px) {
+            .header-inner {
+                flex-wrap: wrap;
+                padding: 15px 16px;
+            }
+
+            .logo {
+                width: 54px;
+                height: 54px;
+            }
+
+            .brand h1 { font-size: 19px; }
+            .brand p { font-size: 10px; }
+
+            .header-actions {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .header-btn { flex: 1; }
+
+            .banner { height: 220px; }
+
+            .container { padding: 27px 13px 35px; }
+
+            .section-heading h2 { font-size: 23px; }
+
+            .panel { padding: 16px; }
+
+            .search-row { flex-direction: column; }
+            .search-row button { width: 100%; }
+
+            .form-grid { grid-template-columns: 1fr; }
+
+            .table-wrap table { min-width: 800px; }
+        }
+    
+.modal{display:none;position:fixed;inset:0;background:rgba(16,24,40,.65);align-items:center;justify-content:center;padding:15px;z-index:1000}
+.modal.show{display:flex}.modal-box{background:white;padding:22px;border-radius:15px;width:min(620px,100%);max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.modal-head h3{margin:0;color:var(--navy)}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.form-group label{display:block;margin-bottom:7px;font-size:13px;font-weight:bold;color:var(--navy)}
+.form-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+@media(max-width:760px){.form-grid{grid-template-columns:1fr}.table-wrap table{min-width:800px}}
+
+.btn-red{background:var(--red);color:#fff}.status-message.success{color:var(--green)}.status-message.error{color:var(--red)}
+</style>
+</head>
+<body>
+<header class="header"><div class="header-inner">
+<img src="../logo.png" alt="Logo Alam Idaman" class="logo">
+<div class="brand"><h1>ALAM IDAMAN</h1><p>PORTAL PENDAFTARAN PELAWAT</p></div>
+<div class="header-actions"><a class="header-btn" href="dashboard.html">← DASHBOARD</a><button class="header-btn" id="logout" type="button">🔐 LOG KELUAR</button></div>
+</div></header>
+<section class="banner"><img src="../banner.jpg" alt="Kawasan perumahan Alam Idaman"><div class="banner-overlay"><div class="banner-content"><h2>Pengurusan Kenderaan</h2><p>Carian, semakan dan kemas kini maklumat kenderaan penduduk Alam Idaman.</p></div></div></section>
+<main class="container">
+<div class="section-heading"><h2>Senarai Kenderaan</h2><p>Carian, tambah, edit dan padam rekod kenderaan.</p></div>
+<section class="panel"><h3>🔎 Carian Kenderaan</h3>
+<form id="searchForm" class="search-row"><input id="q" type="search" placeholder="Cari unit rumah, nama, telefon atau nombor plat..." autocomplete="off"><button id="search" type="submit">CARI</button><button id="reset" type="button" class="btn-light">RESET</button></form>
+<div id="status" class="status-message">Sedang mengesahkan sesi login...</div></section>
+<section class="panel"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:15px"><h3 style="margin:0">Rekod Kenderaan</h3><button id="add" type="button" class="btn-green">+ TAMBAH KENDERAAN</button></div>
+<div class="table-wrap"><table><thead><tr><th>Unit Rumah</th><th>Nama Penduduk</th><th>No. Telefon</th><th>Kategori</th><th>Jenis Kenderaan</th><th>No. Plate</th><th>No.</th><th>Tindakan</th></tr></thead><tbody id="rows"><tr><td colspan="8" class="empty">Memuatkan rekod...</td></tr></tbody></table></div>
+<div id="count" class="status-message"></div></section>
+</main>
+<footer class="footer"><strong>ALAM IDAMAN</strong><br>Visitor Management System (VMS)<br>Sila pastikan semua maklumat kenderaan adalah tepat.</footer>
+<div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><h3 id="modalTitle">Tambah Kenderaan</h3><button id="close" type="button" class="btn-light">TUTUP</button></div>
+<div id="formStatus" class="status-message"></div><form id="form"><input type="hidden" id="row"><div class="form-grid">
+<div class="form-group"><label for="unit">Unit Rumah *</label><select id="unit" required></select></div>
+<div class="form-group"><label for="category">Kategori *</label><select id="category" required><option>Utama</option><option>Extra</option></select></div>
+<div class="form-group"><label for="type">Jenis Kenderaan *</label><select id="type" required><option>Kereta</option><option>Motosikal</option><option>Van</option><option>Lori</option><option>Lain-lain</option></select></div>
+<div class="form-group"><label for="plate">No. Plate *</label><input id="plate" required maxlength="30" placeholder="Contoh: WVF8992"></div>
+</div><p class="help">Unit rumah tidak boleh diubah semasa mengedit rekod.</p><div class="form-actions"><button type="button" id="cancel" class="btn-light">BATAL</button><button id="save" type="submit" class="btn-green">SIMPAN</button></div></form></div></div>
+<script>
+(() => {
+const API_URL='GANTIKAN_DENGAN_URL_WEB_APP_PENGURUSAN_KENDERAAN';
+const LOGIN_API_URL='https://script.google.com/macros/s/AKfycbx9oBehFO9PApRCvdLTl7adSc4VRKfGvGOHJ5LsAVdnzQXEif0caZA_MJOZX3qKLFmLIA/exec';
+const LOGIN_URL='https://alamidaman.github.io/alam-idaman-qr-scanner/admin/';
+const TOKEN_KEY='PPAI_SESSION_TOKEN', token=sessionStorage.getItem(TOKEN_KEY), $=id=>document.getElementById(id);
+let records=[],units=[],mode='add';
+if(!token){location.replace(LOGIN_URL);return;}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function jsonp(url){return new Promise((resolve,reject)=>{const cb='ppaiCb'+Date.now()+Math.floor(Math.random()*10000),s=document.createElement('script'),t=setTimeout(()=>{clean();reject(Error('API tamat masa. Semak URL deployment.'));},20000);function clean(){clearTimeout(t);delete window[cb];s.remove();}window[cb]=d=>{clean();resolve(d)};s.onerror=()=>{clean();reject(Error('Gagal menghubungi API.'))};s.src=url+(url.includes('?')?'&':'?')+'token='+encodeURIComponent(token)+'&callback='+cb;document.head.appendChild(s);});}
+function api(task,p={}){return jsonp(API_URL+'?'+new URLSearchParams({task,...p}));}
+function message(msg,type='ok',id='status'){$(id).textContent=msg;$(id).className='status-message'+(type==='error'?' error':' success');}
+function clear(id='status'){$(id).className='status-message';$(id).textContent='';}
+function loginCheck(){return jsonp(LOGIN_API_URL+'?action=api&task=me&token='+encodeURIComponent(token)+'&callback=ppaiLogin'+Date.now());}
+async function loadUnits(){const r=await api('units');if(!r.success)throw Error(r.message);units=r.units||[];$('unit').innerHTML='<option value="">Pilih Unit Rumah</option>'+units.map(u=>`<option value="${esc(u.unit)}">${esc(u.unit)} — ${esc(u.name)}</option>`).join('');}
+async function search(){clear();$('rows').innerHTML='<tr><td colspan="8" class="empty">Mencari...</td></tr>';const r=await api('search',{q:$('q').value.trim()});if(!r.success)throw Error(r.message);records=r.records||[];$('count').textContent=(r.total||0)+' rekod ditemui';$('rows').innerHTML=records.length?records.map(r=>`<tr><td><b>${esc(r.unit)}</b></td><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${esc(r.category)}</td><td>${esc(r.vehicleType)}</td><td><b>${esc(r.plate)}</b></td><td>${esc(r.no)}</td><td><div class="actions"><button class="edit-btn" data-edit="${r.row}">EDIT</button><button class="btn-red" data-del="${r.row}">PADAM</button></div></td></tr>`).join(''):'<tr><td colspan="8" class="empty">Tiada rekod kenderaan ditemui.</td></tr>';}
+function open(modeNew,r){mode=modeNew;clear('formStatus');$('form').reset();$('row').value=r?r.row:'';$('modalTitle').textContent=r?'Edit Kenderaan':'Tambah Kenderaan';$('unit').disabled=!!r;if(r){$('unit').value=r.unit;$('category').value=r.category;$('type').value=r.vehicleType;$('plate').value=r.plate;}else{$('category').value='Utama';$('type').value='Kereta';}$('modal').classList.add('show');}
+function close(){ $('modal').classList.remove('show');}
+async function submit(e){e.preventDefault();clear('formStatus');const p={unit:$('unit').value,category:$('category').value,vehicleType:$('type').value,plate:$('plate').value.trim()};if(mode==='edit')p.row=$('row').value;$('save').disabled=true;try{const r=await api(mode==='edit'?'update':'add',p);if(!r.success)throw Error(r.message);close();message(r.message);await loadUnits();await search();}catch(err){message(err.message,'error','formStatus')}finally{$('save').disabled=false;}}
+async function del(row){const r=records.find(x=>Number(x.row)===Number(row));if(!r||!confirm(`Padam ${r.plate} untuk ${r.unit}?`))return;try{const x=await api('delete',{row});if(!x.success)throw Error(x.message);message(x.message);await loadUnits();await search();}catch(e){message(e.message,'error')}}
+$('search').onclick=()=>search().catch(e=>message(e.message,'error'));$('q').onkeydown=e=>{if(e.key==='Enter')search().catch(x=>message(x.message,'error'));};$('reset').onclick=()=>{$('q').value='';search().catch(e=>message(e.message,'error'));};$('add').onclick=()=>open('add');$('close').onclick=close;$('cancel').onclick=close;$('modal').onclick=e=>{if(e.target===$('modal'))close();};$('form').onsubmit=submit;
+$('rows').onclick=e=>{const a=e.target.closest('[data-edit]'),d=e.target.closest('[data-del]');if(a){const r=records.find(x=>Number(x.row)===Number(a.dataset.edit));if(r)open('edit',r);}if(d)del(d.dataset.del);};
+$('logout').onclick=async()=>{try{await jsonp(LOGIN_API_URL+'?action=api&task=logout&token='+encodeURIComponent(token)+'&callback=ppaiOut'+Date.now());}catch(e){}sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);};
+(async()=>{try{if(API_URL.startsWith('GANTIKAN_'))throw Error('Tetapkan API_URL selepas deploy backend.');const s=await loginCheck();if(!s.success||!s.user){sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);return;}await loadUnits();await search();}catch(e){message(e.message,'error');$('count').textContent='Gagal memuatkan data';$('rows').innerHTML='<tr><td colspan="6">Semak konfigurasi API.</td></tr>';}})();
+})();
+</script></body></html>
