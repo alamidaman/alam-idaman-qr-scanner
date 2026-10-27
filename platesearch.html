@@ -222,7 +222,9 @@
         addField(body, 'Phone Owner', record.ownerPhone);
         addField(body, 'No. Plate', record.plate);
         addField(body, 'Jenis Kenderaan', record.vehicleType);
-        addField(body, 'Scan Terakhir', record.lastScan);
+        if (record.recordType !== 'Kenderaan Berdaftar') {
+          addField(body, 'Scan Terakhir', record.lastScan);
+        }
 
         card.append(title, body);
         resultsList.appendChild(card);
