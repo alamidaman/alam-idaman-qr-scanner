@@ -418,7 +418,15 @@ let records=[],units=[],mode='add';
 if(!token){location.replace(LOGIN_URL);return;}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function jsonp(baseUrl, params={}){return new Promise((resolve,reject)=>{const cb='ppaiCb'+Date.now()+Math.floor(Math.random()*10000);const script=document.createElement('script');let settled=false;const timer=setTimeout(()=>{cleanup();reject(Error('API tidak memberi respons dalam 20 saat. Semak URL deployment backend kenderaan dan fungsi doGet(e).'));},20000);function cleanup(){if(settled)return;settled=true;clearTimeout(timer);delete window[cb];script.remove();}window[cb]=data=>{cleanup();resolve(data)};script.onerror=()=>{cleanup();reject(Error('Gagal menghubungi API. Semak URL Web App dan kebenaran akses deployment.'));};const url=new URL(baseUrl);Object.entries({...params,token,callback:cb}).forEach(([key,value])=>url.searchParams.set(key,String(value??'')));script.src=url.toString();document.head.appendChild(script);});}
-function api(task,p={}){return jsonp(API_URL+'?'+new URLSearchParams({action:'kenderaan',task,...p}));}
+function api(task, p = {}) {
+  const params = new URLSearchParams({
+    action: 'kenderaan',
+    task: task,
+    ...p
+  });
+
+  return jsonp(API_URL + '?' + params.toString());
+}
 function message(msg,type='ok',id='status'){$(id).textContent=msg;$(id).className='status-message'+(type==='error'?' error':' success');}
 function clear(id='status'){$(id).className='status-message';$(id).textContent='';}
 function loginCheck(){return jsonp(LOGIN_API_URL,{action:'api',task:'me'});}
