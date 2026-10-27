@@ -1,180 +1,562 @@
-```html
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard PPAI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#102d4d">
+    <title>Alam Idaman | Dashboard PPAI</title>
 
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#f2f5f9;font-family:Arial,sans-serif;color:#1d2939}
-header{background:#102b4e;color:white;padding:14px 5%;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:14px}
-.brand img{width:58px;height:58px;object-fit:contain}
-.brand h1{font-size:21px;margin:0}
-.brand p{font-size:12px;margin:5px 0 0;color:#d6e4f0}
-.header-actions{display:flex;align-items:center;gap:12px}
-.header-actions a{color:white;text-decoration:none;font-size:14px}
-button{border:0;border-radius:8px;padding:11px 15px;cursor:pointer;font-weight:bold}
-#logout{background:white;color:#102b4e}
-main{max-width:1100px;margin:30px auto;padding:0 18px}
-.card{background:white;border-radius:14px;padding:24px;box-shadow:0 5px 22px #102b4e12;margin-bottom:18px}
-h2{margin-top:0;color:#102b4e}
-.small{color:#667085;font-size:14px;line-height:1.6}
-.status{padding:12px;border-radius:8px;background:#fef3f2;color:#b42318;line-height:1.5}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
-.tile{border:1px solid #e4e7ec;border-radius:10px;padding:18px}
-.tile strong{display:block;color:#102b4e;margin-bottom:7px}
-@media(max-width:600px){
- header{padding:12px 16px}
- .brand img{width:45px;height:45px}
- .brand h1{font-size:17px}
- main{margin:20px auto}
- .card{padding:18px}
-}
-</style>
+    <style>
+        :root {
+            --navy: #102d4d;
+            --blue: #245a91;
+            --green: #187044;
+            --text: #1c2d40;
+            --muted: #65758a;
+            --background: #f3f6fa;
+            --border: #e1e8f0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        a { text-decoration: none; }
+
+        /* HEADER — SAMA SEPERTI INDEX */
+        .header {
+            background: var(--navy);
+            color: white;
+        }
+
+        .header-inner {
+            max-width: 1120px;
+            margin: auto;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 66px;
+            height: 66px;
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .brand h1 {
+            font-size: 23px;
+            margin: 0 0 5px;
+            letter-spacing: 1px;
+        }
+
+        .brand p {
+            margin: 0;
+            color: #d6e4f2;
+            font-size: 13px;
+            letter-spacing: .5px;
+        }
+
+        .login-link {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 11px 18px;
+            border: 1px solid rgba(255,255,255,.55);
+            border-radius: 10px;
+            color: white;
+            background: rgba(255,255,255,.10);
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .login-link:hover {
+            background: rgba(255,255,255,.20);
+        }
+
+        /* BANNER — SAMA SEPERTI INDEX */
+        .banner {
+            position: relative;
+            height: 320px;
+            overflow: hidden;
+            background: #183c60;
+        }
+
+        .banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            background: linear-gradient(
+                90deg,
+                rgba(8,29,52,.76),
+                rgba(8,29,52,.22)
+            );
+        }
+
+        .banner-content {
+            color: white;
+            max-width: 760px;
+        }
+
+        .banner-content h2 {
+            font-size: clamp(28px,4vw,43px);
+            margin: 0 0 14px;
+            line-height: 1.2;
+        }
+
+        .banner-content p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin: 0;
+            color: #f0f5fb;
+        }
+
+        /* MAIN */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 42px 24px 36px;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .section-heading h2 {
+            margin: 0 0 10px;
+            font-size: 27px;
+            color: var(--navy);
+        }
+
+        .section-heading p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* DASHBOARD CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3,minmax(0,1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 26px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 26px rgba(16,45,77,.06);
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 32px rgba(16,45,77,.11);
+        }
+
+        .card-icon {
+            width: 58px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 29px;
+        }
+
+        .residents .card-icon { background: #e7efff; }
+        .vehicles .card-icon { background: #e2f5e9; }
+        .users .card-icon { background: #fff0dc; }
+
+        .card h3 {
+            font-size: 20px;
+            margin: 0 0 12px;
+            color: var(--navy);
+        }
+
+        .card p {
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 14px;
+            margin: 0 0 20px;
+            flex: 1;
+        }
+
+        .button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            min-height: 46px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            background: var(--blue);
+        }
+
+        .button.green { background: var(--green); }
+
+        .button.disabled {
+            background: #98a6b5;
+            cursor: not-allowed;
+        }
+
+        /* USER INFORMATION */
+        .profile {
+            margin-bottom: 28px;
+            padding: 22px 25px;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--green);
+            border-radius: 13px;
+            background: white;
+            box-shadow: 0 8px 26px rgba(16,45,77,.04);
+        }
+
+        .profile h3 {
+            margin: 0 0 8px;
+            color: var(--navy);
+            font-size: 19px;
+        }
+
+        .profile p {
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--muted);
+        }
+
+        .status {
+            margin-top: 12px;
+            padding: 12px 15px;
+            border-radius: 9px;
+            background: #e2f5e9;
+            color: #187044;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* FOOTER — SAMA SEPERTI INDEX */
+        .footer {
+            background: var(--navy);
+            color: #d5e2ef;
+            text-align: center;
+            padding: 23px 18px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .footer strong { color: white; }
+
+        /* MOBILE */
+        @media (max-width: 800px) {
+            .cards {
+                grid-template-columns: repeat(2,minmax(0,1fr));
+            }
+        }
+
+        @media (max-width: 650px) {
+            .header-inner {
+                padding: 15px 18px;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .logo {
+                width: 54px;
+                height: 54px;
+            }
+
+            .brand h1 { font-size: 19px; }
+
+            .brand p {
+                font-size: 11px;
+                line-height: 1.5;
+            }
+
+            .login-link {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .banner { height: 245px; }
+
+            .banner-content h2 { font-size: 29px; }
+
+            .banner-content p { font-size: 14px; }
+
+            .container { padding: 32px 16px; }
+
+            .section-heading h2 { font-size: 23px; }
+
+            .cards {
+                grid-template-columns: 1fr;
+                gap: 17px;
+            }
+
+            .card { padding: 23px; }
+        }
+    </style>
 </head>
 
 <body>
-<header>
-  <div class="brand">
-    <img src="logo.png" alt="Logo PPAI" onerror="this.style.display='none'">
-    <div>
-      <h1>PORTAL PPAI</h1>
-      <p>Pengurusan Penduduk Alam Idaman</p>
-    </div>
-  </div>
 
-  <div class="header-actions">
-    <a href="index.html">Halaman Utama</a>
-    <button id="logout" type="button">Log Keluar</button>
-  </div>
-</header>
+    <!-- HEADER SAMA SEPERTI INDEX -->
+    <header class="header">
+        <div class="header-inner">
+            <img src="logo.png" alt="Logo Alam Idaman" class="logo">
 
-<main>
-  <section class="card">
-    <h2 id="welcome">Memeriksa sesi...</h2>
-    <p id="details" class="small">Sila tunggu sebentar.</p>
-    <div id="status" class="status">Menyemak sesi login...</div>
-  </section>
+            <div class="brand">
+                <h1>ALAM IDAMAN</h1>
+                <p>PORTAL PENDAFTARAN PELAWAT</p>
+            </div>
 
-  <section class="card">
-    <h2>Menu PPAI</h2>
-    <div class="tiles">
-      <div class="tile">
-        <strong>Pengurusan Penduduk</strong>
-        <span class="small">Belum disambungkan kepada data.</span>
-      </div>
-      <div class="tile">
-        <strong>Pengurusan Kenderaan</strong>
-        <span class="small">Belum disambungkan kepada data.</span>
-      </div>
-      <div class="tile">
-        <strong>Pengurusan Pengguna</strong>
-        <span class="small">Belum disambungkan kepada data.</span>
-      </div>
-    </div>
-  </section>
-</main>
+            <button class="login-link" id="logout" type="button">
+                🔐 LOG KELUAR <span aria-hidden="true">→</span>
+            </button>
+        </div>
+    </header>
 
-<script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbx9oBehFO9PApRCvdLTl7adSc4VRKfGvGOHJ5LsAVdnzQXEif0caZA_MJOZX3qKLFmLIA/exec';
-const LOGIN_URL='https://alamidaman.github.io/alam-idaman-qr-scanner/login.html';
-const TOKEN_KEY='PPAI_SESSION_TOKEN';
+    <!-- BANNER SAMA SEPERTI INDEX -->
+    <section class="banner">
+        <img src="banner.jpg" alt="Kawasan perumahan Alam Idaman">
 
-function jsonp(params){
-  return new Promise((resolve,reject)=>{
-    const cb='ppaiCb_'+Date.now()+'_'+Math.floor(Math.random()*1e5);
-    const s=document.createElement('script');
-    const q=new URLSearchParams({...params,callback:cb});
-    let ended=false;
+        <div class="banner-overlay">
+            <div class="banner-content">
+                <h2>Dashboard PPAI</h2>
+                <p>
+                    Portal pengurusan penduduk, kenderaan dan pengguna
+                    bagi komuniti Alam Idaman.
+                </p>
+            </div>
+        </div>
+    </section>
 
-    const timer=setTimeout(
-      ()=>finish(new Error('Sambungan tamat masa.')),
-      10000
-    );
+    <!-- MAIN DASHBOARD -->
+    <main class="container">
 
-    function finish(err,data){
-      if(ended)return;
-      ended=true;
-      clearTimeout(timer);
-      delete window[cb];
-      s.remove();
-      err?reject(err):resolve(data);
-    }
+        <div class="section-heading">
+            <h2>Dashboard Pengurusan</h2>
+            <p>Selamat datang ke sistem pengurusan PPAI.</p>
+        </div>
 
-    window[cb]=data=>finish(null,data);
-    s.onerror=()=>finish(new Error('Backend tidak dapat dihubungi.'));
-    s.src=GAS_URL+'?action=api&'+q.toString();
-    document.body.appendChild(s);
-  });
-}
+        <section class="profile">
+            <h3 id="welcome">Memeriksa sesi login...</h3>
+            <p id="details">Sila tunggu sebentar.</p>
+            <div class="status" id="status">Menyemak sesi login...</div>
+        </section>
 
-function redirectToLogin(){
-  sessionStorage.removeItem(TOKEN_KEY);
-  window.location.replace(LOGIN_URL);
-}
+        <section class="cards">
 
-async function init(){
-  const url=new URL(window.location.href);
-  const incomingToken=url.searchParams.get('token');
+            <article class="card residents">
+                <div class="card-icon" aria-hidden="true">👥</div>
+                <h3>Pengurusan Penduduk</h3>
+                <p>
+                    Pengurusan maklumat penduduk dan unit kediaman
+                    Alam Idaman.
+                </p>
+                <span class="button disabled">DALAM PEMBANGUNAN</span>
+            </article>
 
-  if(incomingToken){
-    sessionStorage.setItem(TOKEN_KEY,incomingToken);
-    url.searchParams.delete('token');
-    history.replaceState({},document.title,url.pathname+url.search+url.hash);
-  }
+            <article class="card vehicles">
+                <div class="card-icon" aria-hidden="true">🚘</div>
+                <h3>Pengurusan Kenderaan</h3>
+                <p>
+                    Pengurusan maklumat kenderaan dan nombor pendaftaran
+                    kenderaan penduduk.
+                </p>
+                <span class="button green disabled">DALAM PEMBANGUNAN</span>
+            </article>
 
-  const token=sessionStorage.getItem(TOKEN_KEY);
+            <article class="card users">
+                <div class="card-icon" aria-hidden="true">🔐</div>
+                <h3>Pengurusan Pengguna</h3>
+                <p>
+                    Pengurusan akaun pengguna dan peranan akses
+                    sistem PPAI.
+                </p>
+                <span class="button disabled">DALAM PEMBANGUNAN</span>
+            </article>
 
-  if(!token){
-    redirectToLogin();
-    return;
-  }
+        </section>
+    </main>
 
-  try{
-    const result=await jsonp({task:'me',token});
+    <!-- FOOTER SAMA SEPERTI INDEX -->
+    <footer class="footer">
+        <strong>ALAM IDAMAN</strong><br>
+        Visitor Management System (VMS)<br>
+        Sila pastikan semua maklumat pendaftaran adalah tepat.
+    </footer>
 
-    if(!result.success){
-      redirectToLogin();
-      return;
-    }
+    <script>
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbx9oBehFO9PApRCvdLTl7adSc4VRKfGvGOHJ5LsAVdnzQXEif0caZA_MJOZX3qKLFmLIA/exec';
+        const LOGIN_URL = 'https://alamidaman.github.io/alam-idaman-qr-scanner/login.html';
+        const TOKEN_KEY = 'PPAI_SESSION_TOKEN';
 
-    document.getElementById('welcome').textContent=
-      'Selamat datang, '+(result.user.name||result.user.username);
+        function jsonp(params) {
+            return new Promise((resolve, reject) => {
+                const callback = 'ppaiCb_' + Date.now() + '_' +
+                    Math.floor(Math.random() * 100000);
 
-    document.getElementById('details').textContent=
-      'Username: '+result.user.username+' | Peranan: '+result.user.role;
+                const script = document.createElement('script');
+                const query = new URLSearchParams({
+                    ...params,
+                    callback: callback
+                });
 
-    const status=document.getElementById('status');
-    status.textContent='Login berjaya. Sesi tamat selepas 30 minit.';
-    status.style.background='#ecfdf3';
-    status.style.color='#027a48';
+                let finished = false;
 
-  }catch(error){
-    document.getElementById('welcome').textContent='Sesi tidak dapat disahkan';
-    document.getElementById('details').textContent='';
-    document.getElementById('status').textContent=
-      'Tidak dapat menghubungi sistem login. Sila refresh atau cuba lagi.';
-  }
-}
+                const timer = setTimeout(
+                    () => finish(new Error('Sambungan tamat masa.')),
+                    10000
+                );
 
-document.getElementById('logout').addEventListener('click',async()=>{
-  const token=sessionStorage.getItem(TOKEN_KEY);
-  sessionStorage.removeItem(TOKEN_KEY);
+                function finish(error, data) {
+                    if (finished) return;
+                    finished = true;
+                    clearTimeout(timer);
+                    delete window[callback];
+                    script.remove();
 
-  if(token){
-    try{
-      await jsonp({task:'logout',token});
-    }catch(error){}
-  }
+                    if (error) reject(error);
+                    else resolve(data);
+                }
 
-  window.location.replace(LOGIN_URL);
-});
+                window[callback] = data => finish(null, data);
+                script.onerror = () =>
+                    finish(new Error('Backend tidak dapat dihubungi.'));
 
-init();
-</script>
+                script.src = GAS_URL + '?action=api&' + query.toString();
+                document.body.appendChild(script);
+            });
+        }
+
+        function redirectToLogin() {
+            sessionStorage.removeItem(TOKEN_KEY);
+            window.location.replace(LOGIN_URL);
+        }
+
+        async function initDashboard() {
+            const url = new URL(window.location.href);
+            const incomingToken = url.searchParams.get('token');
+
+            if (incomingToken) {
+                sessionStorage.setItem(TOKEN_KEY, incomingToken);
+                url.searchParams.delete('token');
+
+                history.replaceState(
+                    {},
+                    document.title,
+                    url.pathname + url.search + url.hash
+                );
+            }
+
+            const token = sessionStorage.getItem(TOKEN_KEY);
+
+            // Tiada token: terus kembali ke login
+            if (!token) {
+                redirectToLogin();
+                return;
+            }
+
+            try {
+                const result = await jsonp({
+                    task: 'me',
+                    token: token
+                });
+
+                // Token tamat atau tidak sah: kembali ke login
+                if (!result.success || !result.user) {
+                    redirectToLogin();
+                    return;
+                }
+
+                document.getElementById('welcome').textContent =
+                    'Selamat datang, ' +
+                    (result.user.name || result.user.username);
+
+                document.getElementById('details').textContent =
+                    'Username: ' + result.user.username +
+                    ' | Peranan: ' + result.user.role;
+
+                const status = document.getElementById('status');
+                status.textContent =
+                    'Login berjaya. Sesi tamat selepas 30 minit.';
+                status.style.background = '#e2f5e9';
+                status.style.color = '#187044';
+
+            } catch (error) {
+                document.getElementById('welcome').textContent =
+                    'Sesi tidak dapat disahkan';
+
+                document.getElementById('details').textContent = '';
+
+                const status = document.getElementById('status');
+                status.textContent =
+                    'Sistem login tidak dapat dihubungi. Sila cuba semula.';
+                status.style.background = '#fff8e6';
+                status.style.color = '#765000';
+            }
+        }
+
+        document.getElementById('logout').addEventListener(
+            'click',
+            async function () {
+                const token = sessionStorage.getItem(TOKEN_KEY);
+
+                sessionStorage.removeItem(TOKEN_KEY);
+
+                if (token) {
+                    try {
+                        await jsonp({
+                            task: 'logout',
+                            token: token
+                        });
+                    } catch (error) {
+                        // Token setempat sudah dipadam walaupun backend gagal.
+                    }
+                }
+
+                window.location.replace(LOGIN_URL);
+            }
+        );
+
+        initDashboard();
+    </script>
+
 </body>
 </html>
-```
