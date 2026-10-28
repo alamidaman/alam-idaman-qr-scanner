@@ -228,6 +228,45 @@
 
         .table-wrap { overflow-x: auto; }
 
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .pagination-info {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-controls button {
+            min-width: 38px;
+            padding: 9px 12px;
+            background: #e8eef5;
+            color: var(--navy);
+        }
+
+        .pagination-controls button.active {
+            background: var(--blue);
+            color: white;
+        }
+
+        .pagination-controls button:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -372,7 +411,7 @@
 
             .form-grid { grid-template-columns: 1fr; }
 
-            .table-wrap table { min-width: 800px; }
+            .table-wrap table { min-width: 920px; }
         }
     </style>
 </head>
@@ -444,6 +483,7 @@
                     <tr>
                         <th>Unit Rumah</th>
                         <th>Nama Penuh</th>
+                        <th>Email Address</th>
                         <th>No. Telefon</th>
                         <th>Maintenance</th>
                         <th>OH Status</th>
@@ -452,12 +492,17 @@
                 </thead>
                 <tbody id="recordsBody">
                     <tr>
-                        <td colspan="6" class="empty">
+                        <td colspan="7" class="empty">
                             Memuatkan rekod...
                         </td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="pagination">
+            <div id="paginationInfo" class="pagination-info">Memuatkan rekod...</div>
+            <div class="pagination-controls" id="paginationControls" aria-label="Navigasi halaman"></div>
         </div>
 
         <div id="resultCount" class="status-message"></div>
@@ -553,6 +598,11 @@
     const searchStatus = document.getElementById('searchStatus');
     const recordsBody = document.getElementById('recordsBody');
     const resultCount = document.getElementById('resultCount');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const paginationControls = document.getElementById('paginationControls');
+
+    const PAGE_SIZE = 12;
+    let currentPage = 1;
 
     const editPanel = document.getElementById('editPanel');
     const editForm = document.getElementById('editForm');
@@ -733,26 +783,40 @@
     }
 
     function renderRecords(records) {
-        recordsBody.replaceChildren();
-        currentRecords = records;
+        currentRecords = Array.isArray(records) ? records : [];
 
-        if (!records.length) {
+        const totalRecords = currentRecords.length;
+        const totalPages = Math.max(1, Math.ceil(totalRecords / PAGE_SIZE));
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * PAGE_SIZE;
+        const pageRecords = currentRecords.slice(startIndex, startIndex + PAGE_SIZE);
+
+        recordsBody.replaceChildren();
+
+        if (!totalRecords) {
             const tr = document.createElement('tr');
             const td = document.createElement('td');
-            td.colSpan = 6;
+            td.colSpan = 7;
             td.className = 'empty';
             td.textContent = 'Tiada rekod penduduk ditemui.';
             tr.appendChild(td);
             recordsBody.appendChild(tr);
+
+            paginationInfo.textContent = '0 rekod';
+            paginationControls.replaceChildren();
             resultCount.textContent = '0 rekod ditemui.';
             return;
         }
 
-        records.forEach(function (record) {
+        pageRecords.forEach(function (record) {
             const tr = document.createElement('tr');
 
             tr.appendChild(makeCell(record.unit, 'unit'));
             tr.appendChild(makeCell(record.name));
+            tr.appendChild(makeCell(record.email));
             tr.appendChild(makeCell(record.phone));
 
             const maintenanceCell = document.createElement('td');
@@ -779,18 +843,73 @@
             recordsBody.appendChild(tr);
         });
 
-        resultCount.textContent =
-            records.length + ' rekod dipaparkan.';
+        const firstRecord = startIndex + 1;
+        const lastRecord = Math.min(startIndex + PAGE_SIZE, totalRecords);
 
-        if (records.length === 100) {
-            resultCount.textContent +=
-                ' Hasil dihadkan kepada 100 rekod; gunakan carian lebih khusus.';
+        paginationInfo.textContent =
+            'Memaparkan ' + firstRecord + '–' + lastRecord +
+            ' daripada ' + totalRecords + ' rekod';
+
+        resultCount.textContent =
+            totalRecords + ' rekod ditemui · Halaman ' +
+            currentPage + ' daripada ' + totalPages + '.';
+
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        paginationControls.replaceChildren();
+
+        if (totalPages <= 1) return;
+
+        const previousButton = document.createElement('button');
+        previousButton.type = 'button';
+        previousButton.textContent = '‹ Sebelum';
+        previousButton.disabled = currentPage === 1;
+        previousButton.addEventListener('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                renderRecords(currentRecords);
+            }
+        });
+        paginationControls.appendChild(previousButton);
+
+        // Paparkan semua nombor halaman supaya pengguna mudah memilih halaman.
+        for (let page = 1; page <= totalPages; page++) {
+            const pageButton = document.createElement('button');
+            pageButton.type = 'button';
+            pageButton.textContent = String(page);
+            pageButton.className = page === currentPage ? 'active' : '';
+            pageButton.setAttribute('aria-label', 'Halaman ' + page);
+            if (page === currentPage) {
+                pageButton.setAttribute('aria-current', 'page');
+            }
+
+            pageButton.addEventListener('click', function () {
+                currentPage = page;
+                renderRecords(currentRecords);
+            });
+
+            paginationControls.appendChild(pageButton);
         }
+
+        const nextButton = document.createElement('button');
+        nextButton.type = 'button';
+        nextButton.textContent = 'Seterusnya ›';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.addEventListener('click', function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderRecords(currentRecords);
+            }
+        });
+        paginationControls.appendChild(nextButton);
     }
 
     async function searchResidents(query = '') {
         if (!sessionValid) return;
 
+        currentPage = 1;
         searchButton.disabled = true;
         setMessage(searchStatus, 'Sedang mencari rekod...');
         resultCount.textContent = '';
