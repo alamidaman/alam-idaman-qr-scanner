@@ -465,7 +465,7 @@ const LOGIN_API_URL='https://script.google.com/macros/s/AKfycbx9oBehFO9PApRCvdLT
 const LOGIN_URL='https://alamidaman.github.io/alam-idaman-qr-scanner/admin/';
 const TOKEN_KEY='PPAI_SESSION_TOKEN', token=sessionStorage.getItem(TOKEN_KEY), $=id=>document.getElementById(id);
 let records=[],units=[],mode='add',currentPage=1;
-const PAGE_SIZE=20;
+const PAGE_SIZE=10;
 if(!token){location.replace(LOGIN_URL);return;}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function jsonp(baseUrl, params={}){return new Promise((resolve,reject)=>{const cb='ppaiCb'+Date.now()+Math.floor(Math.random()*10000);const script=document.createElement('script');let settled=false;const timer=setTimeout(()=>{cleanup();reject(Error('API tidak memberi respons dalam 20 saat. Semak URL deployment backend kenderaan dan fungsi doGet(e).'));},20000);function cleanup(){if(settled)return;settled=true;clearTimeout(timer);delete window[cb];script.remove();}window[cb]=data=>{cleanup();resolve(data)};script.onerror=()=>{cleanup();reject(Error('Gagal menghubungi API. Semak URL Web App dan kebenaran akses deployment.'));};const url=new URL(baseUrl);Object.entries({...params,token,callback:cb}).forEach(([key,value])=>url.searchParams.set(key,String(value??'')));script.src=url.toString();document.head.appendChild(script);});}
@@ -481,7 +481,7 @@ function renderPage(){
  const start=(currentPage-1)*PAGE_SIZE;
  const pageRecords=records.slice(start,start+PAGE_SIZE);
  $('rows').innerHTML=pageRecords.length?pageRecords.map(r=>`<tr><td><b>${esc(r.unit)}</b></td><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${esc(r.category)}</td><td>${esc(r.vehicleType)}</td><td><b>${esc(r.plate)}</b></td><td>${esc(r.no)}</td><td><div class="actions"><button class="edit-btn" data-edit="${r.row}">EDIT</button><button class="btn-red" data-del="${r.row}">PADAM</button></div></td></tr>`).join(''):'<tr><td colspan="8" class="empty">Tiada rekod kenderaan ditemui.</td></tr>';
- $('count').textContent=total?`Memaparkan ${start+1}–${Math.min(start+PAGE_SIZE,total)} daripada ${total} rekod (20 rekod setiap halaman).`:'0 rekod ditemui';
+ $('count').textContent=total?`Memaparkan ${start+1}–${Math.min(start+PAGE_SIZE,total)} daripada ${total} rekod (${PAGE_SIZE} rekod setiap halaman).`:'0 rekod ditemui';
  const pagination=$('pagination');
  if(totalPages<=1){pagination.innerHTML='';return;}
  let html=`<button type="button" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}>‹ Sebelum</button>`;
