@@ -325,6 +325,14 @@
             .actions button { padding: 8px 10px; font-size: 10px; }
         }
 
+
+        /* Pagination rekod kenderaan */
+        .pagination { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:7px; margin-top:18px; }
+        .pagination button { min-width:38px; min-height:36px; padding:8px 11px; border:1px solid #d6e0eb; border-radius:8px; background:#fff; color:var(--navy); font-size:12px; }
+        .pagination button.active { background:var(--blue); border-color:var(--blue); color:#fff; }
+        .pagination button:disabled { opacity:.4; cursor:not-allowed; }
+        .pagination-info { width:100%; margin-top:3px; text-align:center; color:var(--muted); font-size:12px; }
+
         .empty {
             padding: 24px 10px;
             text-align: center;
@@ -439,6 +447,7 @@
 <div id="status" class="status-message">Sedang mengesahkan sesi login...</div></section>
 <section class="panel"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:15px"><h3 style="margin:0">Rekod Kenderaan</h3><button id="add" type="button" class="btn-green">+ TAMBAH KENDERAAN</button></div>
 <div class="table-wrap"><table><thead><tr><th>Unit Rumah</th><th>Nama Penduduk</th><th>No. Telefon</th><th>Kategori</th><th>Jenis Kenderaan</th><th>No. Plate</th><th>No.</th><th>Tindakan</th></tr></thead><tbody id="rows"><tr><td colspan="8" class="empty">Memuatkan rekod...</td></tr></tbody></table></div>
+<div id="pagination" class="pagination" aria-label="Navigasi halaman rekod"></div>
 <div id="count" class="status-message"></div></section>
 </main>
 <footer class="footer"><strong>ALAM IDAMAN</strong><br>Visitor Management System (VMS)<br>Sila pastikan semua maklumat kenderaan adalah tepat.</footer>
@@ -455,7 +464,8 @@ const API_URL='https://script.google.com/macros/s/AKfycbx9oBehFO9PApRCvdLTl7adSc
 const LOGIN_API_URL='https://script.google.com/macros/s/AKfycbx9oBehFO9PApRCvdLTl7adSc4VRKfGvGOHJ5LsAVdnzQXEif0caZA_MJOZX3qKLFmLIA/exec';
 const LOGIN_URL='https://alamidaman.github.io/alam-idaman-qr-scanner/admin/';
 const TOKEN_KEY='PPAI_SESSION_TOKEN', token=sessionStorage.getItem(TOKEN_KEY), $=id=>document.getElementById(id);
-let records=[],units=[],mode='add';
+let records=[],units=[],mode='add',currentPage=1;
+const PAGE_SIZE=20;
 if(!token){location.replace(LOGIN_URL);return;}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function jsonp(baseUrl, params={}){return new Promise((resolve,reject)=>{const cb='ppaiCb'+Date.now()+Math.floor(Math.random()*10000);const script=document.createElement('script');let settled=false;const timer=setTimeout(()=>{cleanup();reject(Error('API tidak memberi respons dalam 20 saat. Semak URL deployment backend kenderaan dan fungsi doGet(e).'));},20000);function cleanup(){if(settled)return;settled=true;clearTimeout(timer);delete window[cb];script.remove();}window[cb]=data=>{cleanup();resolve(data)};script.onerror=()=>{cleanup();reject(Error('Gagal menghubungi API. Semak URL Web App dan kebenaran akses deployment.'));};const url=new URL(baseUrl);Object.entries({...params,token,callback:cb}).forEach(([key,value])=>url.searchParams.set(key,String(value??'')));script.src=url.toString();document.head.appendChild(script);});}
@@ -464,12 +474,44 @@ function message(msg,type='ok',id='status'){$(id).textContent=msg;$(id).classNam
 function clear(id='status'){$(id).className='status-message';$(id).textContent='';}
 function loginCheck(){return jsonp(LOGIN_API_URL,{action:'api',task:'me'});}
 async function loadUnits(){const r=await api('units');if(!r.success)throw Error(r.message);units=r.units||[];$('unit').innerHTML='<option value="">Pilih Unit Rumah</option>'+units.map(u=>`<option value="${esc(u.unit)}">${esc(u.unit)} — ${esc(u.name)}</option>`).join('');}
-async function search(){clear();$('rows').innerHTML='<tr><td colspan="8" class="empty">Mencari...</td></tr>';const r=await api('search',{q:$('q').value.trim()});if(!r.success)throw Error(r.message);records=r.records||[];$('count').textContent=(r.total||0)+' rekod ditemui';$('rows').innerHTML=records.length?records.map(r=>`<tr><td><b>${esc(r.unit)}</b></td><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${esc(r.category)}</td><td>${esc(r.vehicleType)}</td><td><b>${esc(r.plate)}</b></td><td>${esc(r.no)}</td><td><div class="actions"><button class="edit-btn" data-edit="${r.row}">EDIT</button><button class="btn-red" data-del="${r.row}">PADAM</button></div></td></tr>`).join(''):'<tr><td colspan="8" class="empty">Tiada rekod kenderaan ditemui.</td></tr>';}
+function renderPage(){
+ const total=records.length;
+ const totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+ if(currentPage>totalPages)currentPage=totalPages;
+ const start=(currentPage-1)*PAGE_SIZE;
+ const pageRecords=records.slice(start,start+PAGE_SIZE);
+ $('rows').innerHTML=pageRecords.length?pageRecords.map(r=>`<tr><td><b>${esc(r.unit)}</b></td><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${esc(r.category)}</td><td>${esc(r.vehicleType)}</td><td><b>${esc(r.plate)}</b></td><td>${esc(r.no)}</td><td><div class="actions"><button class="edit-btn" data-edit="${r.row}">EDIT</button><button class="btn-red" data-del="${r.row}">PADAM</button></div></td></tr>`).join(''):'<tr><td colspan="8" class="empty">Tiada rekod kenderaan ditemui.</td></tr>';
+ $('count').textContent=total?`Memaparkan ${start+1}–${Math.min(start+PAGE_SIZE,total)} daripada ${total} rekod (20 rekod setiap halaman).`:'0 rekod ditemui';
+ const pagination=$('pagination');
+ if(totalPages<=1){pagination.innerHTML='';return;}
+ let html=`<button type="button" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}>‹ Sebelum</button>`;
+ for(let page=1;page<=totalPages;page++){
+   html+=`<button type="button" data-page="${page}" class="${page===currentPage?'active':''}" ${page===currentPage?'aria-current="page"':''}>${page}</button>`;
+ }
+ html+=`<button type="button" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''}>Seterusnya ›</button>`;
+ html+=`<div class="pagination-info">Halaman ${currentPage} daripada ${totalPages}</div>`;
+ pagination.innerHTML=html;
+}
+async function search(){
+ clear();
+ $('rows').innerHTML='<tr><td colspan="8" class="empty">Mencari...</td></tr>';
+ $('pagination').innerHTML='';
+ const r=await api('search',{q:$('q').value.trim()});
+ if(!r.success)throw Error(r.message);
+ records=r.records||[];
+ currentPage=1;
+ renderPage();
+ if((r.total||0)>records.length){
+   $('count').textContent+=` Backend memulangkan ${records.length} daripada ${r.total} rekod; had API perlu dinaikkan untuk memaparkan selebihnya.`;
+ }
+}
+
 function open(modeNew,r){mode=modeNew;clear('formStatus');$('form').reset();$('row').value=r?r.row:'';$('modalTitle').textContent=r?'Edit Kenderaan':'Tambah Kenderaan';$('unit').disabled=!!r;if(r){$('unit').value=r.unit;$('category').value=r.category;$('type').value=r.vehicleType;$('plate').value=r.plate;}else{$('category').value='Utama';$('type').value='Kereta';}$('modal').classList.add('show');}
 function close(){ $('modal').classList.remove('show');}
 async function submit(e){e.preventDefault();clear('formStatus');const p={unit:$('unit').value,category:$('category').value,vehicleType:$('type').value,plate:$('plate').value.trim()};if(mode==='edit')p.row=$('row').value;$('save').disabled=true;try{const r=await api(mode==='edit'?'update':'add',p);if(!r.success)throw Error(r.message);close();message(r.message);await loadUnits();await search();}catch(err){message(err.message,'error','formStatus')}finally{$('save').disabled=false;}}
 async function del(row){const r=records.find(x=>Number(x.row)===Number(row));if(!r||!confirm(`Padam ${r.plate} untuk ${r.unit}?`))return;try{const x=await api('delete',{row});if(!x.success)throw Error(x.message);message(x.message);await loadUnits();await search();}catch(e){message(e.message,'error')}}
 $('searchForm').onsubmit=e=>{e.preventDefault();search().catch(err=>message(err.message,'error'));};$('reset').onclick=()=>{$('q').value='';search().catch(e=>message(e.message,'error'));};$('add').onclick=()=>open('add');$('close').onclick=close;$('cancel').onclick=close;$('modal').onclick=e=>{if(e.target===$('modal'))close();};$('form').onsubmit=submit;
+$('pagination').onclick=e=>{const button=e.target.closest('[data-page]');if(!button||button.disabled)return;const page=Number(button.dataset.page);if(!Number.isInteger(page)||page<1||page>Math.ceil(records.length/PAGE_SIZE))return;currentPage=page;renderPage();};
 $('rows').onclick=e=>{const a=e.target.closest('[data-edit]'),d=e.target.closest('[data-del]');if(a){const r=records.find(x=>Number(x.row)===Number(a.dataset.edit));if(r)open('edit',r);}if(d)del(d.dataset.del);};
 $('logout').onclick=async()=>{try{await jsonp(LOGIN_API_URL,{action:'api',task:'logout'});}catch(e){}sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);};
 (async()=>{try{if(!API_URL||API_URL.startsWith('GANTIKAN_'))throw Error('Tetapkan API_URL deployment backend kenderaan.');const s=await loginCheck();if(!s.success||!s.user){sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);return;}message('Sesi sah. Memuatkan data kenderaan...');await loadUnits();await search();}catch(e){message(e.message,'error');$('count').textContent='Gagal memuatkan data';$('rows').innerHTML='<tr><td colspan="8" class="empty">'+esc(e.message)+'</td></tr>';}})();
