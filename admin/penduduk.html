@@ -560,7 +560,7 @@
         <div id="resultCount" class="status-message"></div>
     </section>
 
-    <section class="panel" id="whatsappPanel">
+    <section class="panel" id="whatsappPanel" hidden>
         <div class="summary-heading">
             <div>
                 <h3>📋 Ringkasan WhatsApp</h3>
@@ -568,7 +568,6 @@
             </div>
             <div class="summary-actions">
                 <button type="button" id="copySummaryButton" class="btn-green">SALIN UNTUK WHATSAPP</button>
-                <button type="button" id="resetSummaryButton" class="btn-light">RESET RINGKASAN</button>
             </div>
         </div>
         <textarea id="whatsappSummary" rows="10" readonly
@@ -854,7 +853,14 @@
 
     function renderRecords(records) {
         currentRecords = Array.isArray(records) ? records : [];
-        generateWhatsAppSummary();
+        if (searchInput.value.trim() && currentRecords.length) {
+            whatsappPanel.hidden = false;
+            generateWhatsAppSummary();
+        } else {
+            whatsappPanel.hidden = true;
+            whatsappSummary.value = '';
+            summaryStatus.textContent = '';
+        }
 
         const totalRecords = currentRecords.length;
         const totalPages = Math.max(1, Math.ceil(totalRecords / PAGE_SIZE));
@@ -987,33 +993,24 @@
 
     function generateWhatsAppSummary() {
         const records = currentRecords || [];
-        const countBy = function (field, value) {
-            return records.filter(function (record) {
-                return String(record[field] || '').trim().toUpperCase() === value;
-            }).length;
-        };
-        const lines = [
-            '*RINGKASAN PENDUDUK ALAM IDAMAN*', '',
-            '*Jumlah penduduk:* ' + records.length, '',
-            '*Status Maintenance*',
-            '• PAID: ' + countBy('maintenanceStatus', 'PAID'),
-            '• TEMP: ' + countBy('maintenanceStatus', 'TEMP'),
-            '• NOT PAID: ' + countBy('maintenanceStatus', 'NOT PAID'), '',
-            '*Status OH*',
-            '• VALID: ' + countBy('ohStatus', 'VALID'),
-            '• Belum VALID: ' + records.filter(function (record) {
-                return String(record.ohStatus || '').trim().toUpperCase() !== 'VALID';
-            }).length, '',
-            '*Senarai Penduduk*'
-        ];
-        records.forEach(function (record) {
-            lines.push('• ' + (record.unit || '—') + ' | ' + (record.name || '—') +
-                ' | Maintenance: ' + (record.maintenanceStatus || '—') +
-                ' | OH: ' + (record.ohStatus || '—'));
+        const lines = [];
+
+        records.forEach(function (record, index) {
+            if (index > 0) lines.push('', '');
+            lines.push(
+                '*CARIAN MAKLUMAT PENDUDUK ALAM IDAMAN*',
+                '*Unit Rumah:* ' + (record.unit || '—'),
+                '*Nama Penuh:* ' + (record.name || '—'),
+                '*Email Address:* ' + (record.email || '—'),
+                '*No. Telefon:* ' + (record.phone || '—'),
+                '*Maintenance:* ' + (record.maintenanceStatus || '—'),
+                '*OH Status:* ' + (record.ohStatus || '—')
+            );
         });
+
         whatsappSummary.value = lines.join('\n');
         summaryStatus.textContent = records.length
-            ? 'Ringkasan dikemas kini (' + records.length + ' rekod).'
+            ? 'Ringkasan carian (' + records.length + ' rekod).'
             : 'Tiada rekod untuk diringkaskan.';
         summaryStatus.className = 'status-message';
     }
@@ -1193,10 +1190,6 @@
         searchResidents('');
     });
     document.getElementById('copySummaryButton').addEventListener('click', copyWhatsAppSummary);
-    document.getElementById('resetSummaryButton').addEventListener('click', function () {
-        generateWhatsAppSummary();
-        setMessage(summaryStatus, 'Ringkasan dijana semula daripada rekod semasa.', 'success');
-    });
 
     async function initPage() {
         searchButton.disabled = true;
