@@ -167,15 +167,25 @@ function updateSummary(){
     $('summaryStatus').textContent='';
     return;
   }
-  const lines=['*CARIAN MAKLUMAT KENDERAAN ALAM IDAMAN*'];
-  records.forEach((r,i)=>{
-    if(i>0) lines.push('');
-    lines.push(`*Unit Rumah:* ${r.unit||'—'}`);
-    lines.push(`*Nama Penduduk:* ${r.name||'—'}`);
-    lines.push(`*No. Telefon:* ${r.phone||'—'}`);
-    lines.push(`*Kategori:* ${r.category||'—'}`);
-    lines.push(`*Jenis Kenderaan:* ${r.vehicleType||'—'}`);
-    lines.push(`*No. Plate:* ${String(r.plate||'').replace(/\s+/g,'').toUpperCase()||'—'}`);
+  // Group matching vehicle rows by resident/unit, then list vehicles in sequence.
+  const grouped=new Map();
+  records.forEach(r=>{
+    const key=[r.unit||'',r.name||'',r.phone||''].join('|');
+    if(!grouped.has(key)) grouped.set(key,{unit:r.unit,name:r.name,phone:r.phone,vehicles:[]});
+    grouped.get(key).vehicles.push(r);
+  });
+  const lines=[];
+  [...grouped.values()].forEach((resident,index)=>{
+    if(index>0) lines.push('');
+    lines.push('*CARIAN MAKLUMAT KENDERAAN ALAM IDAMAN*');
+    lines.push(`*Unit Rumah:* ${resident.unit||'—'}`);
+    lines.push(`*Nama Penduduk:* ${resident.name||'—'}`);
+    lines.push(`*No. Telefon:* ${resident.phone||'—'}`);
+    resident.vehicles.forEach((vehicle,i)=>{
+      const type=vehicle.vehicleType||'—';
+      const plate=String(vehicle.plate||'').replace(/\s+/g,'').toUpperCase()||'—';
+      lines.push(`*Kenderaan ${i+1}:* ${type} - ${plate}`);
+    });
   });
   $('whatsappSummary').value=lines.join('\n');
   $('whatsappPanel').style.display='block';
