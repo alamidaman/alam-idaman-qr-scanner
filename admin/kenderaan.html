@@ -133,7 +133,7 @@
 <div class="table-wrap"><table><thead><tr><th>Unit Rumah</th><th>Nama Penduduk</th><th>No. Telefon</th><th>Kategori</th><th>Jenis Kenderaan</th><th>No. Plate</th><th>No.</th><th>Tindakan</th></tr></thead><tbody id="rows"><tr><td colspan="8" class="empty">Memuatkan rekod...</td></tr></tbody></table></div>
 <div id="pagination" class="pagination" aria-label="Navigasi halaman rekod"></div>
 <div id="count" class="status-message"></div></section>
-<section class="panel"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px"><h3 style="margin:0">📋 Ringkasan WhatsApp</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button id="refreshSummary" type="button" class="btn-light">RESET RINGKASAN</button><button id="copySummary" type="button" class="btn-green">SALIN UNTUK WHATSAPP</button></div></div><textarea id="whatsappSummary" rows="9" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:14px/1.6 Arial,Helvetica,sans-serif;resize:vertical" readonly placeholder="Ringkasan akan dipaparkan di sini..."></textarea><div class="help">Ringkasan mengikut rekod yang sedang dipaparkan hasil carian. Tekan SALIN untuk copy dan paste ke WhatsApp.</div><div id="summaryStatus" class="status-message"></div></section>
+<section class="panel" id="whatsappPanel" style="display:none"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px"><h3 style="margin:0">📋 Ringkasan WhatsApp</h3><button id="copySummary" type="button" class="btn-green">SALIN UNTUK WHATSAPP</button></div><textarea id="whatsappSummary" rows="9" style="width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:14px/1.6 Arial,Helvetica,sans-serif;resize:vertical" readonly placeholder="Ringkasan carian kenderaan..."></textarea><div class="help">Ringkasan dipaparkan apabila carian menemui rekod. Tekan SALIN untuk copy dan paste ke WhatsApp.</div><div id="summaryStatus" class="status-message"></div></section>
 </main>
 <footer class="footer"><strong>ALAM IDAMAN</strong><br>Visitor Management System (VMS)<br>Sila pastikan semua maklumat kenderaan adalah tepat.</footer>
 <div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><h3 id="modalTitle">Tambah Kenderaan</h3><button id="close" type="button" class="btn-light">TUTUP</button></div>
@@ -160,16 +160,25 @@ function clear(id='status'){$(id).className='status-message';$(id).textContent='
 function loginCheck(){return jsonp(LOGIN_API_URL,{action:'api',task:'me'});}
 async function loadUnits(){const r=await api('units');if(!r.success)throw Error(r.message);units=r.units||[];$('unit').innerHTML='<option value="">Pilih Unit Rumah</option>'+units.map(u=>`<option value="${esc(u.unit)}">${esc(u.unit)} — ${esc(u.name)}</option>`).join('');}
 function updateSummary(){
-  const total=records.length;
-  const categories={};
-  records.forEach(r=>{const cat=String(r.category||'Tidak dinyatakan').trim()||'Tidak dinyatakan';categories[cat]=(categories[cat]||0)+1;});
-  const lines=['*ALAM IDAMAN – RINGKASAN KENDERAAN*','',`Jumlah rekod kenderaan: ${total}`,''];
-  Object.keys(categories).sort().forEach(cat=>lines.push(`${cat}: ${categories[cat]}`));
-  lines.push('','*Senarai No. Plate:*');
-  if(total){
-    records.forEach((r,i)=>lines.push(`${i+1}. ${String(r.plate||'').replace(/\s+/g,'').toUpperCase()} – ${r.unit||''} (${r.name||'Nama tidak tersedia'})`));
-  }else lines.push('Tiada rekod kenderaan.');
+  const query=$('q').value.trim();
+  if(!query || !records.length){
+    $('whatsappPanel').style.display='none';
+    $('whatsappSummary').value='';
+    $('summaryStatus').textContent='';
+    return;
+  }
+  const lines=['*CARIAN MAKLUMAT KENDERAAN ALAM IDAMAN*'];
+  records.forEach((r,i)=>{
+    if(i>0) lines.push('');
+    lines.push(`*Unit Rumah:* ${r.unit||'—'}`);
+    lines.push(`*Nama Penduduk:* ${r.name||'—'}`);
+    lines.push(`*No. Telefon:* ${r.phone||'—'}`);
+    lines.push(`*Kategori:* ${r.category||'—'}`);
+    lines.push(`*Jenis Kenderaan:* ${r.vehicleType||'—'}`);
+    lines.push(`*No. Plate:* ${String(r.plate||'').replace(/\s+/g,'').toUpperCase()||'—'}`);
+  });
   $('whatsappSummary').value=lines.join('\n');
+  $('whatsappPanel').style.display='block';
   $('summaryStatus').textContent='';
 }
 function renderPage(){
@@ -207,6 +216,7 @@ async function search(){
  records=r.records||[];
  currentPage=1;
  renderPage();
+ updateSummary();
  if((r.total||0)>records.length){
    $('count').textContent+=` Backend memulangkan ${records.length} daripada ${r.total} rekod; had API perlu dinaikkan untuk memaparkan selebihnya.`;
  }
@@ -215,7 +225,7 @@ function open(modeNew,r){mode=modeNew;clear('formStatus');$('form').reset();$('r
 function close(){ $('modal').classList.remove('show');}
 async function submit(e){e.preventDefault();clear('formStatus');const p={unit:$('unit').value,category:$('category').value,vehicleType:$('type').value,plate:$('plate').value.trim()};if(mode==='edit')p.row=$('row').value;$('save').disabled=true;try{const r=await api(mode==='edit'?'update':'add',p);if(!r.success)throw Error(r.message);close();message(r.message);await loadUnits();await search();}catch(err){message(err.message,'error','formStatus')}finally{$('save').disabled=false;}}
 async function del(row){const r=records.find(x=>Number(x.row)===Number(row));if(!r||!confirm(`Padam ${r.plate} untuk ${r.unit}?`))return;try{const x=await api('delete',{row});if(!x.success)throw Error(x.message);message(x.message);await loadUnits();await search();}catch(e){message(e.message,'error')}}
-$('searchForm').onsubmit=e=>{e.preventDefault();search().catch(err=>message(err.message,'error'));};$('reset').onclick=()=>{$('q').value='';search().catch(e=>message(e.message,'error'));};$('refreshSummary').onclick=updateSummary;$('copySummary').onclick=async()=>{try{await navigator.clipboard.writeText($('whatsappSummary').value);$('summaryStatus').textContent='Ringkasan berjaya disalin. Boleh paste ke WhatsApp.';$('summaryStatus').className='status-message success';}catch(e){$('whatsappSummary').focus();$('whatsappSummary').select();$('summaryStatus').textContent='Clipboard tidak dapat diakses. Teks telah dipilih; tekan Ctrl+C untuk salin.';$('summaryStatus').className='status-message error';}};$('add').onclick=()=>open('add');$('close').onclick=close;$('cancel').onclick=close;$('modal').onclick=e=>{if(e.target===$('modal'))close();};$('form').onsubmit=submit;
+$('searchForm').onsubmit=e=>{e.preventDefault();search().catch(err=>message(err.message,'error'));};$('reset').onclick=()=>{$('q').value='';$('whatsappPanel').style.display='none';$('whatsappSummary').value='';$('summaryStatus').textContent='';search().catch(e=>message(e.message,'error'));};$('copySummary').onclick=async()=>{try{await navigator.clipboard.writeText($('whatsappSummary').value);$('summaryStatus').textContent='Ringkasan berjaya disalin. Boleh paste ke WhatsApp.';$('summaryStatus').className='status-message success';}catch(e){$('whatsappSummary').focus();$('whatsappSummary').select();$('summaryStatus').textContent='Clipboard tidak dapat diakses. Teks telah dipilih; tekan Ctrl+C untuk salin.';$('summaryStatus').className='status-message error';}};$('add').onclick=()=>open('add');$('close').onclick=close;$('cancel').onclick=close;$('modal').onclick=e=>{if(e.target===$('modal'))close();};$('form').onsubmit=submit;
 $('pagination').onclick=e=>{const button=e.target.closest('[data-page]');if(!button||button.disabled)return;const page=Number(button.dataset.page);if(!Number.isInteger(page)||page<1||page>Math.ceil(records.length/PAGE_SIZE))return;currentPage=page;renderPage();};
 $('rows').onclick=e=>{const a=e.target.closest('[data-edit]'),d=e.target.closest('[data-del]');if(a){const r=records.find(x=>Number(x.row)===Number(a.dataset.edit));if(r)open('edit',r);}if(d)del(d.dataset.del);};
 $('logout').onclick=async()=>{try{await jsonp(LOGIN_API_URL,{action:'api',task:'logout'});}catch(e){}sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);};
