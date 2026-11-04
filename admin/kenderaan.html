@@ -159,37 +159,58 @@ function message(msg,type='ok',id='status'){$(id).textContent=msg;$(id).classNam
 function clear(id='status'){$(id).className='status-message';$(id).textContent='';}
 function loginCheck(){return jsonp(LOGIN_API_URL,{action:'api',task:'me'});}
 async function loadUnits(){const r=await api('units');if(!r.success)throw Error(r.message);units=r.units||[];$('unit').innerHTML='<option value="">Pilih Unit Rumah</option>'+units.map(u=>`<option value="${esc(u.unit)}">${esc(u.unit)} — ${esc(u.name)}</option>`).join('');}
-function updateSummary(){
-  const query=$('q').value.trim();
-  if(!query || !records.length){
-    $('whatsappPanel').style.display='none';
-    $('whatsappSummary').value='';
-    $('summaryStatus').textContent='';
+function updateSummary() {
+  const query = $('q').value.trim();
+
+  if (!query || !records.length) {
+    $('whatsappPanel').style.display = 'none';
+    $('whatsappSummary').value = '';
+    $('summaryStatus').textContent = '';
     return;
   }
-  // Group matching vehicle rows by resident/unit, then list vehicles in sequence.
-  const grouped=new Map();
-  records.forEach(r=>{
-    const key=[r.unit||'',r.name||'',r.phone||''].join('|');
-    if(!grouped.has(key)) grouped.set(key,{unit:r.unit,name:r.name,phone:r.phone,vehicles:[]});
+
+  const grouped = new Map();
+
+  records.forEach(r => {
+    const key = [r.unit || '', r.name || '', r.phone || '', r.email || ''].join('|');
+
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        unit: r.unit,
+        name: r.name,
+        phone: r.phone,
+        email: r.email,
+        vehicles: []
+      });
+    }
+
     grouped.get(key).vehicles.push(r);
   });
-  const lines=[];
-  [...grouped.values()].forEach((resident,index)=>{
-    if(index>0) lines.push('');
+
+  const lines = [];
+
+  [...grouped.values()].forEach((resident, index) => {
+    if (index > 0) lines.push('');
+
     lines.push('*CARIAN MAKLUMAT KENDERAAN ALAM IDAMAN*');
-    lines.push(`*Unit Rumah:* ${resident.unit||'—'}`);
-    lines.push(`*Nama Penduduk:* ${resident.name||'—'}`);
-    lines.push(`*No. Telefon:* ${resident.phone||'—'}`);
-    resident.vehicles.forEach((vehicle,i)=>{
-      const type=vehicle.vehicleType||'—';
-      const plate=String(vehicle.plate||'').replace(/\s+/g,'').toUpperCase()||'—';
-      lines.push(`*Kenderaan ${i+1}:* ${type} - ${plate}`);
+    lines.push(`*Unit Rumah:* ${resident.unit || '—'}`);
+    lines.push(`*Nama Penduduk:* ${resident.name || '—'}`);
+    lines.push(`*No. Telefon:* ${resident.phone || '—'}`);
+    lines.push(`*Email:* ${resident.email || '—'}`);
+
+    resident.vehicles.forEach((vehicle, i) => {
+      const type = vehicle.vehicleType || '—';
+      const plate = String(vehicle.plate || '')
+        .replace(/\s+/g, '')
+        .toUpperCase() || '—';
+
+      lines.push(`*Kenderaan ${i + 1}:* ${type} - ${plate}`);
     });
   });
-  $('whatsappSummary').value=lines.join('\n');
-  $('whatsappPanel').style.display='block';
-  $('summaryStatus').textContent='';
+
+  $('whatsappSummary').value = lines.join('\n');
+  $('whatsappPanel').style.display = 'block';
+  $('summaryStatus').textContent = '';
 }
 function renderPage(){
  const total=records.length;
