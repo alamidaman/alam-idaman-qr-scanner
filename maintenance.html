@@ -381,7 +381,7 @@
       }
 
       // Standard blocks: B-01-01 => Blok 1, B-02-01 => Blok 2, etc.
-      const match = value.match(/^B-?(\\d{1,2})-/);
+      const match = value.match(/^B-?(\d{1,2})-/);
       if (!match) return '';
 
       const number = Number(match[1]);
