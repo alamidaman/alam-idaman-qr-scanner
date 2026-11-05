@@ -254,9 +254,10 @@
       <div class="note">
         <strong>Format caj:</strong><br>
         RM80 = Maintenance asas<br>
-        X = Caj tambahan kenderaan (RM10 setiap satu)<br>
+        X = Kenderaan Extra (RM10 setiap satu selepas 5 kenderaan)<br>
         P = Sewa parking (RM20 setiap satu)<br>
-        TT = Tertunggak (Dibincangkan)
+        TT = Penambahan bayaran<br>
+        Teks menggunakan tanda * untuk bold apabila dipaste ke WhatsApp.
       </div>
 
     </section>
@@ -334,100 +335,53 @@
     }
 
     /**
-     * Kira caj dan bina baris WhatsApp.
+     * Bina baris WhatsApp menggunakan asterisk (*) untuk bold.
+     * Format: *B-01-01* | TT | 2X | 1P | *RM120* |
      */
     function createLine(record) {
       const unit = String(record.unit || '').trim();
-
-      const vehicleCount = Math.max(
-        0,
-        Number(record.vehicleCount || 0)
-      );
-
-      const parkingCount = Math.max(
-        0,
-        Number(record.parkingCount || 0)
-      );
-
-      const additionalPayment = Math.max(
-        0,
-        Number(record.additionalPayment || 0)
-      );
-
-      // Kenderaan yang lebih daripada 5 sahaja dikenakan X.
-      const extraVehicles = Math.max(
-        0,
-        vehicleCount - VEHICLE_LIMIT
-      );
-
-      const vehicleCharge =
-        extraVehicles * VEHICLE_EXTRA_CHARGE;
-
-      const parkingCharge =
-        parkingCount * PARKING_CHARGE;
+      const extraVehicles = Math.max(0, Number(record.extraVehicles || 0));
+      const parkingCount = Math.max(0, Number(record.parkingCount || 0));
+      const additionalPayment = Math.max(0, Number(record.additionalPayment || 0));
 
       const total =
         BASE_MAINTENANCE +
-        vehicleCharge +
-        parkingCharge +
+        extraVehicles * VEHICLE_EXTRA_CHARGE +
+        parkingCount * PARKING_CHARGE +
         additionalPayment;
 
-      const parts = [unit];
+      const parts = ['*' + unit + '*'];
 
-      // TT ditentukan berdasarkan Penambahan Bayaran.
-      if (additionalPayment > 0) {
-        parts.push('TT');
-      }
+      if (additionalPayment > 0) parts.push('*TT*');
+      if (extraVehicles > 0) parts.push('*' + extraVehicles + 'X*');
+      if (parkingCount > 0) parts.push('*' + parkingCount + 'P*');
 
-      // X = caj kenderaan tambahan.
-      if (extraVehicles > 0) {
-        parts.push(extraVehicles + 'X');
-      }
-
-      // P = sewa parking.
-      if (parkingCount > 0) {
-        parts.push(parkingCount + 'P');
-      }
-
-      parts.push(money(total));
-
-      // Kolum terakhir dibiarkan kosong untuk status manual.
+      parts.push('*' + money(total) + '*');
       return parts.join(' | ') + ' |';
     }
 
-    /**
-     * Susun unit mengikut nombor.
-     */
     function sortUnits(a, b) {
       return String(a.unit).localeCompare(
         String(b.unit),
         undefined,
-        {
-          numeric: true,
-          sensitivity: 'base'
-        }
+        { numeric: true, sensitivity: 'base' }
       );
     }
 
     /**
-     * Padankan unit rumah kepada nama blok dropdown.
-     * B-01-01 / B-01-3A -> Blok 1
-     * B-12-03 -> Blok 12
+     * Unit B-01-01 / B-01-3A => Blok 1; B-12-03 => Blok 12.
      */
     function getBlockFromUnit(unit) {
       const value = String(unit || '').trim().toUpperCase();
       const match = value.match(/^B-?(\\d{1,2})-/);
-
       if (!match) return '';
 
-      const blockNumber = Number(match[1]);
-      return blockNumber >= 1 && blockNumber <= 12
-        ? 'Blok ' + blockNumber
-        : '';
+      const number = Number(match[1]);
+      return number >= 1 && number <= 12 ? 'Blok ' + number : '';
     }
 
     /**
-     * Dropdown tetap Blok 1 hingga Blok 12.
+     * Dropdown tetap mempunyai Blok 1 hingga Blok 12.
      */
     function populateBlocks() {
       const selected = blockInput.value;
@@ -444,74 +398,84 @@
     }
 
     /**
-     * Jana teks WhatsApp.
+     * Jana output dari rekod terkini.
+     */
+    function renderRecords(records) {
+      const block = blockInput.value;
+      const current = getCurrentMonthYear();
+
+      const filtered = (Array.isArray(records) ? records : [])
+        .filter(record => getBlockFromUnit(record.unit) === block)
+        .sort(sortUnits);
+
+      const lines = [
+        '*REKOD BAYARAN MAINTENANCE*',
+        '*Bulan: ' + current.month + ' ' + current.year + '*',
+        '*Blok: ' + block + '*',
+        ''
+      ];
+
+      if (!filtered.length) {
+        lines.push('Tiada rekod penduduk untuk blok ini.');
+      } else {
+        filtered.forEach(record => lines.push(createLine(record)));
+      }
+
+      output.value = lines.join('\n');
+      output.scrollTop = 0;
+      statusBox.textContent = filtered.length +
+        ' rekod dijana. Data telah disegarkan. Semak sebelum copy ke WhatsApp.';
+    }
+
+    /**
+     * Refresh data dari spreadsheet setiap kali Jana Rekod ditekan.
      */
     function generateRecords() {
       const block = blockInput.value;
 
       if (!block) {
-        statusBox.textContent =
-          'Sila pilih blok terlebih dahulu.';
+        statusBox.textContent = 'Sila pilih blok terlebih dahulu.';
+        output.value = '';
         return;
       }
 
-      const current = getCurrentMonthYear();
-
-      const filtered = allRecords
-        .filter(function(record) {
-          return getBlockFromUnit(record.unit) === block;
-        })
-        .sort(sortUnits);
-
-      let text = '';
-
-      text += 'REKOD BAYARAN MAINTENANCE\n';
-      text += 'Bulan: ' + current.month + ' ' + current.year + '\n';
-      text += 'Blok: ' + block + '\n\n';
-
-      if (!filtered.length) {
-        text += 'Tiada rekod penduduk untuk blok ini.';
-      } else {
-        text += filtered
-          .map(createLine)
-          .join('\n');
-      }
-
-      output.value = text;
-
-      statusBox.textContent =
-        filtered.length +
-        ' rekod dijana. Semak hasil sebelum copy ke WhatsApp.';
-    }
-
-    /**
-     * Muat turun rekod dari Code.gs.
-     */
-    function loadData() {
+      output.value = '';
+      statusBox.textContent = 'Sedang refresh data spreadsheet dan jana rekod...';
       generateButton.disabled = true;
-      statusBox.textContent = 'Sedang memuatkan data...';
 
       google.script.run
         .withSuccessHandler(function(records) {
           allRecords = Array.isArray(records) ? records : [];
-
-          populateBlocks();
-
-          statusBox.textContent =
-            allRecords.length +
-            ' rekod berjaya dimuatkan.';
-
+          renderRecords(allRecords);
           generateButton.disabled = false;
-
-          if (allRecords.length > 0) {
-            generateRecords();
-          }
         })
         .withFailureHandler(function(error) {
-          statusBox.textContent =
-            'Gagal mendapatkan data: ' +
-            (error.message || error);
+          output.value = '';
+          statusBox.textContent = 'Gagal refresh data: ' +
+            (error && error.message ? error.message : error);
+          generateButton.disabled = false;
+        })
+        .getMaintenanceRecords();
+    }
 
+    /**
+     * Load awal: fetch data dan isi dropdown. Jana juga output pertama.
+     */
+    function loadData() {
+      populateBlocks();
+      generateButton.disabled = true;
+      statusBox.textContent = 'Sedang memuatkan data spreadsheet...';
+
+      google.script.run
+        .withSuccessHandler(function(records) {
+          allRecords = Array.isArray(records) ? records : [];
+          renderRecords(allRecords);
+          generateButton.disabled = false;
+        })
+        .withFailureHandler(function(error) {
+          output.value = '';
+          statusBox.textContent = 'Gagal mendapatkan data: ' +
+            (error && error.message ? error.message : error);
           generateButton.disabled = false;
         })
         .getMaintenanceRecords();
@@ -569,7 +533,7 @@
       });
 
     updateCurrentMonth();
-    populateBlocks(); // Dropdown dipaparkan sebelum data dimuatkan
+    populateBlocks();
     loadData();
   </script>
 </body>
