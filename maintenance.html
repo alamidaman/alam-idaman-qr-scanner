@@ -373,7 +373,15 @@
      */
     function getBlockFromUnit(unit) {
       const value = String(unit || '').trim().toUpperCase();
-      const match = value.match(/^B-?(\d{1,2})-/);
+
+      // Special block: B-04-01 represents Blok 3A.
+      // Units B-3A-01, B-3A-02, etc. also belong to Blok 3A.
+      if (/^B-04-/.test(value) || /^B-3A-/.test(value)) {
+        return 'Blok 3A';
+      }
+
+      // Standard blocks: B-01-01 => Blok 1, B-02-01 => Blok 2, etc.
+      const match = value.match(/^B-?(\\d{1,2})-/);
       if (!match) return '';
 
       const number = Number(match[1]);
@@ -387,12 +395,18 @@
       const selected = blockInput.value;
       blockInput.replaceChildren();
 
+      // Standard blocks 1–12, with Blok 3A as an additional named block.
       for (let i = 1; i <= 12; i++) {
         const option = document.createElement('option');
         option.value = 'Blok ' + i;
         option.textContent = 'Blok ' + i;
         blockInput.appendChild(option);
       }
+
+      const specialOption = document.createElement('option');
+      specialOption.value = 'Blok 3A';
+      specialOption.textContent = 'Blok 3A';
+      blockInput.appendChild(specialOption);
 
       if (selected) blockInput.value = selected;
     }
@@ -410,8 +424,8 @@
 
       const lines = [
         '*REKOD BAYARAN MAINTENANCE*',
-        '*Bulan: ' + current.month + ' ' + current.year + '*',
-        '*Blok: ' + block + '*',
+        'Bulan: *' + current.month + ' ' + current.year + '*',
+        '*' + block + '*',
         ''
       ];
 
