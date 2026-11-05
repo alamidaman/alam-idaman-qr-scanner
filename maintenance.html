@@ -410,41 +410,42 @@
     }
 
     /**
-     * Tukar nombor unit kepada nama blok.
-     * Contoh B-01-01 -> Blok 1
-     * Contoh B-12-03 -> Blok 12
+     * Tukar unit rumah kepada blok.
+     * B-01-01 dan B-01-3A -> Blok 1
+     * B-12-03 -> Blok 12
      */
     function getBlockFromUnit(unit) {
       const value = String(unit || '').trim().toUpperCase();
-
-      // Format biasa: B-01-01 atau B01-01
       const match = value.match(/^B-?(\\d{1,2})-/);
 
-      if (match) {
-        const blockNumber = Number(match[1]);
-        if (blockNumber >= 1 && blockNumber <= 12) {
-          return 'Blok ' + blockNumber;
-        }
-      }
+      if (!match) return '';
 
-      return '';
+      const number = Number(match[1]);
+      return number >= 1 && number <= 12
+        ? 'Blok ' + number
+        : '';
     }
 
     /**
-     * Dropdown blok sentiasa memaparkan Blok 1 hingga Blok 12,
-     * walaupun sesetengah blok belum mempunyai rekod.
+     * Dropdown statik: sentiasa memaparkan Blok 1 hingga Blok 12,
+     * tidak bergantung pada data yang berjaya dimuatkan.
      */
-    function populateBlocks(records) {
-      const blocks = Array.from({ length: 12 }, (_, index) => 'Blok ' + (index + 1));
-
+    function populateBlocks() {
+      const currentValue = blockInput.value;
       blockInput.replaceChildren();
 
-      blocks.forEach(function(block) {
+      for (let number = 1; number <= 12; number++) {
+        const block = 'Blok ' + number;
         const option = document.createElement('option');
+
         option.value = block;
         option.textContent = block;
         blockInput.appendChild(option);
-      });
+      }
+
+      if (currentValue) {
+        blockInput.value = currentValue;
+      }
     }
 
     /**
@@ -499,7 +500,7 @@
         .withSuccessHandler(function(records) {
           allRecords = Array.isArray(records) ? records : [];
 
-          populateBlocks(allRecords);
+          populateBlocks();
 
           statusBox.textContent =
             allRecords.length +
@@ -573,7 +574,7 @@
       });
 
     updateCurrentMonth();
-    loadData();
+    populateBlocks(); // Paparkan dropdown sebelum data/API dimuatkan\n    loadData();
   </script>
 </body>
 </html>
