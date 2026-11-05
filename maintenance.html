@@ -410,8 +410,8 @@
     }
 
     /**
-     * Tukar unit rumah kepada blok.
-     * B-01-01 dan B-01-3A -> Blok 1
+     * Padankan unit rumah kepada nama blok dropdown.
+     * B-01-01 / B-01-3A -> Blok 1
      * B-12-03 -> Blok 12
      */
     function getBlockFromUnit(unit) {
@@ -420,32 +420,27 @@
 
       if (!match) return '';
 
-      const number = Number(match[1]);
-      return number >= 1 && number <= 12
-        ? 'Blok ' + number
+      const blockNumber = Number(match[1]);
+      return blockNumber >= 1 && blockNumber <= 12
+        ? 'Blok ' + blockNumber
         : '';
     }
 
     /**
-     * Dropdown statik: sentiasa memaparkan Blok 1 hingga Blok 12,
-     * tidak bergantung pada data yang berjaya dimuatkan.
+     * Dropdown tetap Blok 1 hingga Blok 12.
      */
     function populateBlocks() {
-      const currentValue = blockInput.value;
+      const selected = blockInput.value;
       blockInput.replaceChildren();
 
-      for (let number = 1; number <= 12; number++) {
-        const block = 'Blok ' + number;
+      for (let i = 1; i <= 12; i++) {
         const option = document.createElement('option');
-
-        option.value = block;
-        option.textContent = block;
+        option.value = 'Blok ' + i;
+        option.textContent = 'Blok ' + i;
         blockInput.appendChild(option);
       }
 
-      if (currentValue) {
-        blockInput.value = currentValue;
-      }
+      if (selected) blockInput.value = selected;
     }
 
     /**
@@ -574,7 +569,8 @@
       });
 
     updateCurrentMonth();
-    populateBlocks(); // Paparkan dropdown sebelum data/API dimuatkan\n    loadData();
+    populateBlocks(); // Dropdown dipaparkan sebelum data dimuatkan
+    loadData();
   </script>
 </body>
 </html>
