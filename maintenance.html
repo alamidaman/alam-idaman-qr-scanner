@@ -340,6 +340,15 @@
      */
     function createLine(record) {
       const unit = String(record.unit || '').trim();
+      const residentName = String(record.name || '').trim();
+      const isVacant = !residentName || residentName.toLowerCase() === 'rumah kosong';
+
+      // Rumah kosong: display compact unit format and label only.
+      if (isVacant) {
+        const compactUnit = unit.replace(/^B-(\d{2})-/, 'B$1-');
+        return compactUnit + ' | Rumah Kosong';
+      }
+
       const extraVehicles = Math.max(0, Number(record.extraVehicles || 0));
       const parkingCount = Math.max(0, Number(record.parkingCount || 0));
       const additionalPayment = Math.max(0, Number(record.additionalPayment || 0));
@@ -369,7 +378,7 @@
     }
 
     /**
-     * Unit B-01-01 / B-01-3A => Blok 1; B-12-03 => Blok 12.
+     * B-01-... => Blok 01; B-04-... and B-3A-... => Blok 3A.
      */
     function getBlockFromUnit(unit) {
       const value = String(unit || '').trim().toUpperCase();
@@ -385,20 +394,22 @@
       if (!match) return '';
 
       const number = Number(match[1]);
-      return number >= 1 && number <= 12 ? 'Blok ' + number : '';
+      return number >= 1 && number <= 12 ? 'Blok ' + String(number).padStart(2, '0') : '';
     }
 
     /**
-     * Dropdown tetap mempunyai Blok 1 hingga Blok 12.
+     * Dropdown menggunakan label Blok 01-09, Blok 3A, Blok 10-12.
      */
     function populateBlocks() {
       const selected = blockInput.value;
       blockInput.replaceChildren();
 
       const blocks = [];
-      for (let i = 1; i <= 3; i++) blocks.push('Blok ' + i);
+      for (let i = 1; i <= 3; i++) blocks.push('Blok ' + String(i).padStart(2, '0'));
       blocks.push('Blok 3A');
-      for (let i = 5; i <= 12; i++) blocks.push('Blok ' + i);
+      for (let i = 5; i <= 12; i++) {
+        blocks.push('Blok ' + (i <= 9 ? String(i).padStart(2, '0') : String(i)));
+      }
 
       blocks.forEach(block => {
         const option = document.createElement('option');
@@ -410,7 +421,7 @@
       if (selected && blocks.includes(selected)) {
         blockInput.value = selected;
       } else {
-        blockInput.value = 'Blok 1';
+        blockInput.value = 'Blok 01';
       }
     }
 
