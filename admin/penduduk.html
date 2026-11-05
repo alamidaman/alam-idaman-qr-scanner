@@ -514,7 +514,7 @@
             <input
                 id="searchInput"
                 type="search"
-                placeholder="Cari unit, nama, telefon atau email..."
+                placeholder="Cari unit, nama, telefon, email atau sewa parking..."
                 autocomplete="off"
             >
             <button id="searchButton" type="submit">CARI</button>
@@ -537,6 +537,7 @@
                         <th>Nama Penuh</th>
                         <th>Email Address</th>
                         <th>No. Telefon</th>
+                        <th>Sewa Parking</th>
                         <th>Maintenance</th>
                         <th>OH Status</th>
                         <th>Tindakan</th>
@@ -544,7 +545,7 @@
                 </thead>
                 <tbody id="recordsBody">
                     <tr>
-                        <td colspan="7" class="empty">
+                        <td colspan="8" class="empty">
                             Memuatkan rekod...
                         </td>
                     </tr>
@@ -667,6 +668,7 @@
     const resultCount = document.getElementById('resultCount');
     const paginationInfo = document.getElementById('paginationInfo');
     const paginationControls = document.getElementById('paginationControls');
+    const whatsappPanel = document.getElementById('whatsappPanel');
     const whatsappSummary = document.getElementById('whatsappSummary');
     const summaryStatus = document.getElementById('summaryStatus');
 
@@ -895,6 +897,9 @@
             tr.appendChild(makeCell(record.name));
             tr.appendChild(makeCell(record.email));
             tr.appendChild(makeCell(record.phone));
+            tr.appendChild(makeCell(
+                Math.max(0, parseInt(record.sewaParking, 10) || 0).toString()
+            ));
 
             const maintenanceCell = document.createElement('td');
             maintenanceCell.appendChild(makeBadge(record.maintenanceStatus));
@@ -1003,6 +1008,7 @@
                 '*Nama Penuh:* ' + (record.name || '—'),
                 '*Email Address:* ' + (record.email || '—'),
                 '*No. Telefon:* ' + (record.phone || '—'),
+                '*Sewa Parking:* ' + (Math.max(0, parseInt(record.sewaParking, 10) || 0)),
                 '*Maintenance:* ' + (record.maintenanceStatus || '—'),
                 '*OH Status:* ' + (record.ohStatus || '—')
             );
