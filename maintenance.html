@@ -427,10 +427,74 @@
         ' rekod dijana. Data telah disegarkan. Semak sebelum copy ke WhatsApp.';
     }
 
+    // URL Google Apps Script Web App (/exec), bukan URL GitHub Pages.
+    // Gantikan dengan URL deployment Apps Script anda.
+    const MAINTENANCE_API_URL = 'https://script.google.com/macros/s/AKfycbx9oBehFO9PApRCvdLTl7adSc4VRKfGvGOHJ5LsAVdnzQXEif0caZA_MJOZX3qKLFmLIA/exec';
+
     /**
-     * Refresh data dari spreadsheet setiap kali Jana Rekod ditekan.
+     * Memanggil endpoint Apps Script menggunakan JSONP.
+     * Sesuai untuk HTML yang dihoskan di GitHub Pages (elak isu CORS).
      */
-    function generateRecords() {
+    function requestMaintenanceRecords() {
+      return new Promise((resolve, reject) => {
+        if (!MAINTENANCE_API_URL ||
+            MAINTENANCE_API_URL.indexOf('PASTE_') === 0) {
+          reject(new Error('Sila masukkan URL Web App Apps Script dalam MAINTENANCE_API_URL.'));
+          return;
+        }
+
+        const callbackName = 'maintenanceJsonp_' +
+          Date.now() + '_' + Math.floor(Math.random() * 1000000);
+        const script = document.createElement('script');
+        let timeoutId;
+
+        function cleanup() {
+          if (timeoutId) clearTimeout(timeoutId);
+          script.remove();
+          try {
+            delete window[callbackName];
+          } catch (_) {
+            window[callbackName] = undefined;
+          }
+        }
+
+        window[callbackName] = function(payload) {
+          cleanup();
+
+          if (!payload || payload.success !== true) {
+            reject(new Error(payload && payload.message
+              ? payload.message
+              : 'Respons API tidak sah.'));
+            return;
+          }
+
+          resolve(Array.isArray(payload.records) ? payload.records : []);
+        };
+
+        script.onerror = function() {
+          cleanup();
+          reject(new Error('Tidak dapat menghubungi API maintenance. Semak URL dan deployment Web App.'));
+        };
+
+        const separator = MAINTENANCE_API_URL.indexOf('?') >= 0 ? '&' : '?';
+        script.src = MAINTENANCE_API_URL + separator +
+          'action=maintenanceRecords&callback=' +
+          encodeURIComponent(callbackName) +
+          '&_=' + Date.now();
+
+        timeoutId = setTimeout(function() {
+          cleanup();
+          reject(new Error('Permintaan tamat masa. Cuba semula.'));
+        }, 20000);
+
+        document.head.appendChild(script);
+      });
+    }
+
+    /**
+     * Jana output dan refresh data setiap kali butang ditekan.
+     */
+    async function generateRecords() {
       const block = blockInput.value;
 
       if (!block) {
@@ -442,43 +506,42 @@
       output.value = '';
       statusBox.textContent = 'Sedang refresh data spreadsheet dan jana rekod...';
       generateButton.disabled = true;
+      generateButton.textContent = 'Loading...';
 
-      google.script.run
-        .withSuccessHandler(function(records) {
-          allRecords = Array.isArray(records) ? records : [];
-          renderRecords(allRecords);
-          generateButton.disabled = false;
-        })
-        .withFailureHandler(function(error) {
-          output.value = '';
-          statusBox.textContent = 'Gagal refresh data: ' +
-            (error && error.message ? error.message : error);
-          generateButton.disabled = false;
-        })
-        .getMaintenanceRecords();
+      try {
+        allRecords = await requestMaintenanceRecords();
+        renderRecords(allRecords);
+      } catch (error) {
+        output.value = '';
+        statusBox.textContent = 'Gagal refresh data: ' +
+          (error && error.message ? error.message : String(error));
+      } finally {
+        generateButton.disabled = false;
+        generateButton.textContent = 'Jana Rekod';
+      }
     }
 
     /**
-     * Load awal: fetch data dan isi dropdown. Jana juga output pertama.
+     * Load awal: isi dropdown dan jalankan refresh pertama.
      */
-    function loadData() {
+    async function loadData() {
       populateBlocks();
       generateButton.disabled = true;
+      generateButton.textContent = 'Loading...';
       statusBox.textContent = 'Sedang memuatkan data spreadsheet...';
+      output.value = '';
 
-      google.script.run
-        .withSuccessHandler(function(records) {
-          allRecords = Array.isArray(records) ? records : [];
-          renderRecords(allRecords);
-          generateButton.disabled = false;
-        })
-        .withFailureHandler(function(error) {
-          output.value = '';
-          statusBox.textContent = 'Gagal mendapatkan data: ' +
-            (error && error.message ? error.message : error);
-          generateButton.disabled = false;
-        })
-        .getMaintenanceRecords();
+      try {
+        allRecords = await requestMaintenanceRecords();
+        renderRecords(allRecords);
+      } catch (error) {
+        output.value = '';
+        statusBox.textContent = 'Gagal mendapatkan data: ' +
+          (error && error.message ? error.message : String(error));
+      } finally {
+        generateButton.disabled = false;
+        generateButton.textContent = 'Jana Rekod';
+      }
     }
 
     /**
