@@ -256,7 +256,7 @@
         RM80 = Maintenance asas<br>
         X = Caj tambahan kenderaan (RM10 setiap satu)<br>
         P = Sewa parking (RM20 setiap satu)<br>
-        TT = Tertunggak (Dibincangkan), jika Penambahan Bayaran (RM) mempunyai nilai.
+        TT = Tertunggak (Dibincangkan)
       </div>
 
     </section>
@@ -410,54 +410,39 @@
     }
 
     /**
-     * Dapatkan kod blok daripada unit.
-     * Contoh B03-01 -> B03
-     * Contoh B-01-01 -> B-01
+     * Tukar nombor unit kepada nama blok.
+     * Contoh B-01-01 -> Blok 1
+     * Contoh B-12-03 -> Blok 12
      */
     function getBlockFromUnit(unit) {
-      const value = String(unit || '').trim();
+      const value = String(unit || '').trim().toUpperCase();
 
-      const parts = value.split('-');
+      // Format biasa: B-01-01 atau B01-01
+      const match = value.match(/^B-?(\\d{1,2})-/);
 
-      if (parts.length >= 3) {
-        return parts.slice(0, 2).join('-');
-      }
-
-      if (parts.length >= 2) {
-        return parts[0];
+      if (match) {
+        const blockNumber = Number(match[1]);
+        if (blockNumber >= 1 && blockNumber <= 12) {
+          return 'Blok ' + blockNumber;
+        }
       }
 
       return '';
     }
 
     /**
-     * Isi pilihan blok secara automatik daripada data.
+     * Dropdown blok sentiasa memaparkan Blok 1 hingga Blok 12,
+     * walaupun sesetengah blok belum mempunyai rekod.
      */
     function populateBlocks(records) {
-      const blocks = [...new Set(
-        records
-          .map(record => getBlockFromUnit(record.unit))
-          .filter(Boolean)
-      )].sort((a, b) =>
-        a.localeCompare(b, undefined, { numeric: true })
-      );
+      const blocks = Array.from({ length: 12 }, (_, index) => 'Blok ' + (index + 1));
 
       blockInput.replaceChildren();
 
-      if (!blocks.length) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Tiada blok dijumpai';
-        blockInput.appendChild(option);
-        return;
-      }
-
       blocks.forEach(function(block) {
         const option = document.createElement('option');
-
         option.value = block;
         option.textContent = block;
-
         blockInput.appendChild(option);
       });
     }
