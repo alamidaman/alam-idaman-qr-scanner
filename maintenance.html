@@ -345,7 +345,7 @@
 
       // Rumah kosong: display compact unit format and label only.
       if (isVacant) {
-        const compactUnit = unit.replace(/^B-(\d{2})-/, 'B$1-');
+        const compactUnit = unit.replace(/^B-?(\d{2})-/, 'B-$1-');
         return compactUnit + ' | Rumah Kosong';
       }
 
