@@ -609,6 +609,13 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="editSewaParking">Sewa Parking (Jumlah)</label>
+                    <input id="editSewaParking" type="number" min="0" step="1" value="0"
+                        inputmode="numeric" placeholder="0">
+                    <div class="help">Masukkan jumlah parking sewa. Kosong dikira 0.</div>
+                </div>
+
+                <div class="form-group">
                     <label for="editMaintenance">Maintenance Status *</label>
                     <select id="editMaintenance" required>
                         <option value="PAID">PAID</option>
@@ -1082,6 +1089,8 @@
         document.getElementById('editName').value = record.name || '';
         document.getElementById('editEmail').value = record.email || '';
         document.getElementById('editPhone').value = record.phone || '';
+        document.getElementById('editSewaParking').value =
+            Math.max(0, parseInt(record.sewaParking, 10) || 0);
 
         document.getElementById('editMaintenance').value =
             ['PAID', 'TEMP', 'NOT PAID'].includes(record.maintenanceStatus)
@@ -1125,6 +1134,7 @@
             name: document.getElementById('editName').value.trim(),
             email: document.getElementById('editEmail').value.trim(),
             phone: document.getElementById('editPhone').value.trim(),
+            sewaParking: Math.max(0, parseInt(document.getElementById('editSewaParking').value, 10) || 0),
             maintenanceStatus:
                 document.getElementById('editMaintenance').value,
             ohStatus: document.getElementById('editOH').value
