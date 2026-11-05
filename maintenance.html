@@ -350,13 +350,13 @@
         parkingCount * PARKING_CHARGE +
         additionalPayment;
 
-      const parts = ['*' + unit + '*'];
+      const parts = [unit];
 
-      if (additionalPayment > 0) parts.push('*TT*');
-      if (extraVehicles > 0) parts.push('*' + extraVehicles + 'X*');
-      if (parkingCount > 0) parts.push('*' + parkingCount + 'P*');
+      if (additionalPayment > 0) parts.push('TT');
+      if (extraVehicles > 0) parts.push(extraVehicles + 'X');
+      if (parkingCount > 0) parts.push(parkingCount + 'P');
 
-      parts.push('*' + money(total) + '*');
+      parts.push('RM' + Number(total).toFixed(0));
       return parts.join(' | ') + ' |';
     }
 
@@ -395,20 +395,23 @@
       const selected = blockInput.value;
       blockInput.replaceChildren();
 
-      // Standard blocks 1–12, with Blok 3A as an additional named block.
-      for (let i = 1; i <= 12; i++) {
+      const blocks = [];
+      for (let i = 1; i <= 3; i++) blocks.push('Blok ' + i);
+      blocks.push('Blok 3A');
+      for (let i = 5; i <= 12; i++) blocks.push('Blok ' + i);
+
+      blocks.forEach(block => {
         const option = document.createElement('option');
-        option.value = 'Blok ' + i;
-        option.textContent = 'Blok ' + i;
+        option.value = block;
+        option.textContent = block;
         blockInput.appendChild(option);
+      });
+
+      if (selected && blocks.includes(selected)) {
+        blockInput.value = selected;
+      } else {
+        blockInput.value = 'Blok 1';
       }
-
-      const specialOption = document.createElement('option');
-      specialOption.value = 'Blok 3A';
-      specialOption.textContent = 'Blok 3A';
-      blockInput.appendChild(specialOption);
-
-      if (selected) blockInput.value = selected;
     }
 
     /**
