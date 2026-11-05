@@ -373,7 +373,7 @@
      */
     function getBlockFromUnit(unit) {
       const value = String(unit || '').trim().toUpperCase();
-      const match = value.match(/^B-?(\\d{1,2})-/);
+      const match = value.match(/^B-?(\d{1,2})-/);
       if (!match) return '';
 
       const number = Number(match[1]);
@@ -492,7 +492,7 @@
     }
 
     /**
-     * Jana output dan refresh data setiap kali butang ditekan.
+     * Jana output dan refresh data hanya apabila butang ditekan.
      */
     async function generateRecords() {
       const block = blockInput.value;
@@ -522,26 +522,15 @@
     }
 
     /**
-     * Load awal: isi dropdown dan jalankan refresh pertama.
+     * Load awal hanya menyediakan dropdown dan status.
+     * Tiada panggilan API atau output dijana sehingga butang ditekan.
      */
-    async function loadData() {
+    function loadData() {
       populateBlocks();
-      generateButton.disabled = true;
-      generateButton.textContent = 'Loading...';
-      statusBox.textContent = 'Sedang memuatkan data spreadsheet...';
       output.value = '';
-
-      try {
-        allRecords = await requestMaintenanceRecords();
-        renderRecords(allRecords);
-      } catch (error) {
-        output.value = '';
-        statusBox.textContent = 'Gagal mendapatkan data: ' +
-          (error && error.message ? error.message : String(error));
-      } finally {
-        generateButton.disabled = false;
-        generateButton.textContent = 'Jana Rekod';
-      }
+      generateButton.disabled = false;
+      generateButton.textContent = 'Jana Rekod';
+      statusBox.textContent = 'Pilih blok, kemudian klik Jana Rekod untuk mendapatkan data terkini.';
     }
 
     /**
@@ -579,10 +568,11 @@
       generateRecords
     );
 
-    blockInput.addEventListener(
-      'change',
-      generateRecords
-    );
+    blockInput.addEventListener('change', function() {
+      output.value = '';
+      statusBox.textContent = 'Blok dipilih: ' + blockInput.value +
+        '. Klik Jana Rekod untuk memaparkan rekod.';
+    });
 
     document.getElementById('copyButton')
       .addEventListener('click', copyToWhatsApp);
