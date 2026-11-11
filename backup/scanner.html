@@ -246,8 +246,10 @@
     
       <label for="ohPlateInput">Nombor Plat Kenderaan</label>
       <input id="ohPlateInput" type="text" placeholder="Contoh: ABC1234" autocomplete="off" style="text-transform: uppercase; margin-top:12px;">
+      <label for="ohLicensePhoto" style="display:block;margin-top:14px;">Gambar depan lesen memandu</label>
+      <input id="ohLicensePhoto" type="file" accept="image/*" capture="environment" style="margin-top:8px;width:100%;">
     
-      <button id="ohRecordBtn" type="button" onclick="recordOpenHouseScan()">REKOD OPEN HOUSE</button>
+      <button id="ohRecordBtn" type="button" onclick="recordOpenHouseScan()">REKOD PELAWAT</button>
     </div>
 
     <!-- VISITOR RESULT -->
@@ -313,6 +315,8 @@
 
       <!-- CHECK IN -->
       <div id="checkInArea" class="hidden">
+        <label for="visitorLicensePhoto" style="display:block;margin:12px 0 6px;">Gambar depan lesen memandu (wajib untuk CHECK IN pertama)</label>
+        <input id="visitorLicensePhoto" type="file" accept="image/*" capture="environment" style="width:100%;margin-bottom:12px;">
         <button id="checkInBtn" type="button" class="btn-checkin" onclick="checkInVisitor()">CHECK IN</button>
       </div>
 
@@ -691,63 +695,26 @@
       }, callbackName);
     }
     
-    function recordOpenHouseScan() {
+    async function recordOpenHouseScan() {
       const openHouseId = document.getElementById('ohDetailId').textContent.trim();
       const plateInput = document.getElementById('ohPlateInput');
       const plateNumber = plateInput.value.trim().toUpperCase();
+      const photoInput = document.getElementById('ohLicensePhoto');
       const button = document.getElementById('ohRecordBtn');
-    
-      if (!openHouseId || openHouseId === '-') {
-        showGlobalMessage('Sila scan QR Open House terlebih dahulu.', 'error');
-        return;
-      }
-    
-      if (!plateNumber) {
-        showGlobalMessage('Sila masukkan nombor plat kenderaan.', 'error');
-        plateInput.focus();
-        return;
-      }
-    
-      button.disabled = true;
-      button.textContent = 'SEDANG MEREKOD...';
-    
-      showGlobalMessage('MEREKOD SCAN OPEN HOUSE...', '');
-    
-      const callbackName = 'openHouseScanCallback_' + Date.now();
-    
-      window[callbackName] = function(response) {
-        try {
-          if (response && response.success) {
-            showGlobalMessage(
-              '✓ Scan Open House berjaya direkodkan. Plat: ' + plateNumber,
-              'success'
-            );
-    
-            plateInput.value = '';
-          } else {
-            showGlobalMessage(
-              response && response.message
-                ? response.message
-                : 'Gagal merekodkan scan Open House.',
-              'error'
-            );
-          }
-        } finally {
-          button.disabled = false;
-          button.textContent = 'REKOD OPEN HOUSE';
-    
-          delete window[callbackName];
-    
-          const script = document.getElementById(callbackName);
-          if (script) script.remove();
-        }
-      };
-    
-      loadApi('openhouse_scan', {
-        openHouseId: openHouseId,
-        guardName: GUARD_NAME,
-        plateNumber: plateNumber
-      }, callbackName);
+      if (!openHouseId || openHouseId === '-') return showGlobalMessage('Sila scan QR Open House terlebih dahulu.', 'error');
+      if (!plateNumber) { showGlobalMessage('Sila masukkan nombor plat kenderaan.', 'error'); plateInput.focus(); return; }
+      if (!photoInput.files || !photoInput.files[0]) { showGlobalMessage('Sila ambil gambar depan lesen memandu bagi kenderaan ini.', 'error'); photoInput.focus(); return; }
+      button.disabled = true; button.textContent = 'MENYIMPAN GAMBAR...';
+      showGlobalMessage('Sedang menyimpan gambar lesen dan merekodkan nombor plat...', '');
+      try {
+        const imageData = await compressLicenseImage(photoInput.files[0]);
+        const response = await submitLicenseUpload({action:'openhouse', openHouseId:openHouseId, guardName:GUARD_NAME, plateNumber:plateNumber, imageData:imageData});
+        if (!response.success) throw new Error(response.message || 'Gagal menyimpan gambar lesen.');
+        showGlobalMessage('✓ ' + response.message + ' Plat: ' + plateNumber, 'success');
+        plateInput.value = ''; photoInput.value = '';
+      } catch (err) {
+        showGlobalMessage(err.message || 'Gagal menyimpan gambar. Plat tidak direkodkan.', 'error');
+      } finally { button.disabled = false; button.textContent = 'REKOD OPEN HOUSE'; }
     }
 
     /* =========================================================
@@ -858,52 +825,87 @@
        CHECK IN - NO GUARD NAME
     ========================================================= */
     
-    function checkInVisitor() {
-        if (!currentVisitor) {
-            showGlobalMessage('Tiada Visitor dipilih.', 'error');
-            return;
-        }
-    
-        const button = document.getElementById('checkInBtn');
-    
-        button.disabled = true;
-        button.textContent = 'PROCESSING...';
-    
-        const callbackName = 'checkInCallback_' + Date.now();
-    
-        window[callbackName] = function(response) {
-            try {
-                if (response && response.success) {
-                    currentVisitor.checkedIn = true;
-                    displayVisitor(currentVisitor);
-    
-                    showGlobalMessage(
-                        '✓ Pelawat berjaya CHECK IN. Guard: ' + GUARD_NAME,
-                        'success'
-                    );
-                } else {
-                    showGlobalMessage(
-                        response && response.message
-                            ? response.message
-                            : 'CHECK IN gagal.',
-                        'error'
-                    );
-                }
-            } finally {
-                button.disabled = false;
-                button.textContent = 'CHECK IN';
-    
-                delete window[callbackName];
-    
-                const script = document.getElementById(callbackName);
-                if (script) script.remove();
-            }
+    async function checkInVisitor() {
+      if (!currentVisitor) { showGlobalMessage('Tiada Visitor dipilih.', 'error'); return; }
+      const button = document.getElementById('checkInBtn');
+      const photoInput = document.getElementById('visitorLicensePhoto');
+      if (!photoInput.files || !photoInput.files[0]) { showGlobalMessage('Sila ambil gambar depan lesen memandu sebelum CHECK IN.', 'error'); photoInput.focus(); return; }
+      button.disabled = true; button.textContent = 'MENYIMPAN GAMBAR...';
+      try {
+        const imageData = await compressLicenseImage(photoInput.files[0]);
+        const response = await submitLicenseUpload({action:'visitor_checkin', visitorId:currentVisitor.visitorId, guardName:GUARD_NAME, imageData:imageData});
+        if (!response.success) throw new Error(response.message || 'CHECK IN gagal.');
+        currentVisitor.checkedIn = true;
+        displayVisitor(currentVisitor);
+        photoInput.value = '';
+        showGlobalMessage('✓ ' + response.message, 'success');
+      } catch (err) {
+        showGlobalMessage(err.message || 'Gagal menyimpan gambar. CHECK IN tidak dibuat.', 'error');
+      } finally { button.disabled = false; button.textContent = 'CHECK IN'; }
+    }
+
+    function compressLicenseImage(file) {
+      return new Promise(function(resolve, reject) {
+        if (!file || !file.type || !file.type.startsWith('image/')) return reject(new Error('Fail gambar tidak sah.'));
+        const reader = new FileReader();
+        reader.onerror = function() { reject(new Error('Gagal membaca gambar. Sila ambil semula.')); };
+        reader.onload = function() {
+          const img = new Image();
+          img.onerror = function() { reject(new Error('Gambar tidak dapat dibuka.')); };
+          img.onload = function() {
+            const maxWidth = 1200;
+            const scale = Math.min(1, maxWidth / img.width);
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            let data = canvas.toDataURL('image/jpeg', 0.68);
+            if (data.length > 600000) data = canvas.toDataURL('image/jpeg', 0.48);
+            if (data.length > 650000) return reject(new Error('Gambar terlalu besar. Sila ambil gambar semula dengan lebih dekat.'));
+            resolve(data);
+          };
+          img.src = reader.result;
         };
-    
-        loadApi('checkin', {
-            visitorId: currentVisitor.visitorId,
-            guardName: GUARD_NAME
-        }, callbackName);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function submitLicenseUpload(payload) {
+      return new Promise(function(resolve, reject) {
+        const token = 'lic_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+        const iframeName = 'licenseUploadFrame_' + token;
+        const iframe = document.createElement('iframe');
+        iframe.name = iframeName; iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        const form = document.createElement('form');
+        form.method = 'POST'; form.action = API_URL; form.target = iframeName; form.style.display = 'none';
+        const fields = Object.assign({}, payload, {token:token});
+        Object.keys(fields).forEach(function(key) {
+          const input = document.createElement('input'); input.type = 'hidden'; input.name = key; input.value = fields[key]; form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        let finished = false; let pollCount = 0;
+        const cleanup = function() { form.remove(); iframe.remove(); };
+        const poll = function() {
+          if (finished) return;
+          pollCount++;
+          const cb = 'licenseStatus_' + Date.now() + '_' + pollCount;
+          window[cb] = function(response) {
+            delete window[cb];
+            const script = document.getElementById(cb); if (script) script.remove();
+            if (response && !response.pending && (response.success || response.message)) {
+              finished = true; cleanup(); resolve(response); return;
+            }
+            if (pollCount >= 45) { finished = true; cleanup(); reject(new Error('Masa menunggu tamat. Semak rekod sebelum cuba lagi untuk mengelakkan rekod berganda.')); return; }
+            setTimeout(poll, 1000);
+          };
+          loadApi('upload_status', {token:token}, cb);
+        };
+        form.submit();
+        setTimeout(poll, 1200);
+        setTimeout(function() { if (!finished) { finished = true; cleanup(); reject(new Error('Tiada pengesahan daripada server. Semak tab log dan folder Drive sebelum cuba lagi.')); } }, 50000);
+      });
     }
 
 
