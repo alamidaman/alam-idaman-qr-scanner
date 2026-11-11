@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Alam Idaman Guard</title>
+  <title>Scanner VMS Alam Idaman</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
@@ -246,8 +246,10 @@
     
       <label for="ohPlateInput">Nombor Plat Kenderaan</label>
       <input id="ohPlateInput" type="text" placeholder="Contoh: ABC1234" autocomplete="off" style="text-transform: uppercase; margin-top:12px;">
-      <label for="ohLicensePhoto" style="display:block;margin-top:14px;">Gambar depan lesen memandu</label>
-      <input id="ohLicensePhoto" type="file" accept="image/*" capture="environment" style="margin-top:8px;width:100%;">
+      <div id="ohLicenseArea">
+        <label for="ohLicensePhoto" style="display:block;margin-top:14px;">Gambar depan lesen memandu</label>
+        <input id="ohLicensePhoto" type="file" accept="image/*" capture="environment" style="margin-top:8px;width:100%;">
+      </div>
     
       <button id="ohRecordBtn" type="button" onclick="recordOpenHouseScan()">REKOD PELAWAT</button>
     </div>
@@ -315,8 +317,10 @@
 
       <!-- CHECK IN -->
       <div id="checkInArea" class="hidden">
-        <label for="visitorLicensePhoto" style="display:block;margin:12px 0 6px;">Gambar depan lesen memandu (wajib untuk CHECK IN pertama)</label>
-        <input id="visitorLicensePhoto" type="file" accept="image/*" capture="environment" style="width:100%;margin-bottom:12px;">
+        <div id="visitorLicenseArea">
+          <label for="visitorLicensePhoto" style="display:block;margin:12px 0 6px;">Gambar depan lesen memandu (wajib untuk CHECK IN pertama)</label>
+          <input id="visitorLicensePhoto" type="file" accept="image/*" capture="environment" style="width:100%;margin-bottom:12px;">
+        </div>
         <button id="checkInBtn" type="button" class="btn-checkin" onclick="checkInVisitor()">CHECK IN</button>
       </div>
 
@@ -344,6 +348,40 @@
     let scanning       = false;
     let scanLocked     = false;
     let currentVisitor = null;
+    let scannerLicenseRequired = true;
+
+    /* =========================================================
+       SCANNER SETTINGS
+    ========================================================= */
+
+    function loadScannerSettings() {
+      const callbackName = 'scannerSettingsCallback_' + Date.now();
+
+      window[callbackName] = function(response) {
+        try {
+          if (!response || response.success !== true) {
+            console.warn('Gagal mendapatkan tetapan Scanner License.');
+            return;
+          }
+
+          scannerLicenseRequired = response.licenseRequired === true;
+
+          const visitorLicenseArea = document.getElementById('visitorLicenseArea');
+          const ohLicenseArea = document.getElementById('ohLicenseArea');
+
+          if (visitorLicenseArea) visitorLicenseArea.classList.toggle('hidden', !scannerLicenseRequired);
+          if (ohLicenseArea) ohLicenseArea.classList.toggle('hidden', !scannerLicenseRequired);
+
+          console.log('Scanner License Required:', scannerLicenseRequired);
+        } finally {
+          delete window[callbackName];
+          const script = document.getElementById(callbackName);
+          if (script) script.remove();
+        }
+      };
+
+      loadApi('license_setting', {}, callbackName);
+    }
 
     /* =========================================================
        PAGE LOAD
@@ -351,6 +389,7 @@
 
     window.addEventListener('load', function() {
       console.log('Visitor Management System ready.');
+      loadScannerSettings();
     });
 
     /* =========================================================
@@ -701,20 +740,48 @@
       const plateNumber = plateInput.value.trim().toUpperCase();
       const photoInput = document.getElementById('ohLicensePhoto');
       const button = document.getElementById('ohRecordBtn');
+
       if (!openHouseId || openHouseId === '-') return showGlobalMessage('Sila scan QR Open House terlebih dahulu.', 'error');
-      if (!plateNumber) { showGlobalMessage('Sila masukkan nombor plat kenderaan.', 'error'); plateInput.focus(); return; }
-      if (!photoInput.files || !photoInput.files[0]) { showGlobalMessage('Sila ambil gambar depan lesen memandu bagi kenderaan ini.', 'error'); photoInput.focus(); return; }
-      button.disabled = true; button.textContent = 'MENYIMPAN GAMBAR...';
-      showGlobalMessage('Sedang menyimpan gambar lesen dan merekodkan nombor plat...', '');
+      if (!plateNumber) {
+        showGlobalMessage('Sila masukkan nombor plat kenderaan.', 'error');
+        plateInput.focus();
+        return;
+      }
+
+      if (scannerLicenseRequired && (!photoInput.files || !photoInput.files[0])) {
+        showGlobalMessage('Sila ambil gambar depan lesen memandu bagi kenderaan ini.', 'error');
+        photoInput.focus();
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = scannerLicenseRequired ? 'MENYIMPAN GAMBAR...' : 'MEREKODKAN PELAWAT...';
+      showGlobalMessage(scannerLicenseRequired ? 'Sedang menyimpan gambar lesen dan merekodkan nombor plat...' : 'Sedang merekodkan nombor plat Open House...', '');
+
       try {
-        const imageData = await compressLicenseImage(photoInput.files[0]);
-        const response = await submitLicenseUpload({action:'openhouse', openHouseId:openHouseId, guardName:GUARD_NAME, plateNumber:plateNumber, imageData:imageData});
-        if (!response.success) throw new Error(response.message || 'Gagal menyimpan gambar lesen.');
+        const payload = {
+          action: 'openhouse',
+          openHouseId: openHouseId,
+          guardName: GUARD_NAME,
+          plateNumber: plateNumber
+        };
+
+        if (scannerLicenseRequired) {
+          payload.imageData = await compressLicenseImage(photoInput.files[0]);
+        }
+
+        const response = await submitLicenseUpload(payload);
+        if (!response.success) throw new Error(response.message || 'Gagal merekodkan pelawat.');
+
         showGlobalMessage('✓ ' + response.message + ' Plat: ' + plateNumber, 'success');
-        plateInput.value = ''; photoInput.value = '';
+        plateInput.value = '';
+        photoInput.value = '';
       } catch (err) {
-        showGlobalMessage(err.message || 'Gagal menyimpan gambar. Plat tidak direkodkan.', 'error');
-      } finally { button.disabled = false; button.textContent = 'REKOD OPEN HOUSE'; }
+        showGlobalMessage(err.message || 'Gagal merekodkan pelawat. Plat tidak direkodkan.', 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'REKOD PELAWAT';
+      }
     }
 
     /* =========================================================
@@ -826,22 +893,47 @@
     ========================================================= */
     
     async function checkInVisitor() {
-      if (!currentVisitor) { showGlobalMessage('Tiada Visitor dipilih.', 'error'); return; }
+      if (!currentVisitor) {
+        showGlobalMessage('Tiada Visitor dipilih.', 'error');
+        return;
+      }
+
       const button = document.getElementById('checkInBtn');
       const photoInput = document.getElementById('visitorLicensePhoto');
-      if (!photoInput.files || !photoInput.files[0]) { showGlobalMessage('Sila ambil gambar depan lesen memandu sebelum CHECK IN.', 'error'); photoInput.focus(); return; }
-      button.disabled = true; button.textContent = 'MENYIMPAN GAMBAR...';
+
+      if (scannerLicenseRequired && (!photoInput.files || !photoInput.files[0])) {
+        showGlobalMessage('Sila ambil gambar depan lesen memandu sebelum CHECK IN.', 'error');
+        photoInput.focus();
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = scannerLicenseRequired ? 'MENYIMPAN GAMBAR...' : 'SEDANG CHECK IN...';
+
       try {
-        const imageData = await compressLicenseImage(photoInput.files[0]);
-        const response = await submitLicenseUpload({action:'visitor_checkin', visitorId:currentVisitor.visitorId, guardName:GUARD_NAME, imageData:imageData});
+        const payload = {
+          action: 'visitor_checkin',
+          visitorId: currentVisitor.visitorId,
+          guardName: GUARD_NAME
+        };
+
+        if (scannerLicenseRequired) {
+          payload.imageData = await compressLicenseImage(photoInput.files[0]);
+        }
+
+        const response = await submitLicenseUpload(payload);
         if (!response.success) throw new Error(response.message || 'CHECK IN gagal.');
+
         currentVisitor.checkedIn = true;
         displayVisitor(currentVisitor);
         photoInput.value = '';
         showGlobalMessage('✓ ' + response.message, 'success');
       } catch (err) {
-        showGlobalMessage(err.message || 'Gagal menyimpan gambar. CHECK IN tidak dibuat.', 'error');
-      } finally { button.disabled = false; button.textContent = 'CHECK IN'; }
+        showGlobalMessage(err.message || 'CHECK IN gagal. Sila cuba sekali lagi.', 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = 'CHECK IN';
+      }
     }
 
     function compressLicenseImage(file) {
