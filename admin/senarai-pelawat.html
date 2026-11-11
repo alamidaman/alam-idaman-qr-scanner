@@ -73,7 +73,7 @@ $('period').onchange=setFilterFields;$('filterForm').onsubmit=e=>{e.preventDefau
 $('reset').onclick=()=>{$('q').value='';$('period').value='daily';$('visitDate').value=dateLocal();$('visitMonth').value=dateLocal().slice(0,7);setFilterFields();search().catch(e=>message(e.message,'error'));};
 $('pagination').onclick=e=>{const b=e.target.closest('[data-page]');if(!b||b.disabled)return;const p=Number(b.dataset.page);if(p<1||p>Math.ceil(records.length/PAGE_SIZE))return;currentPage=p;render();};
 $('logout').onclick=async()=>{try{await jsonp(LOGIN_API_URL,{action:'api',task:'logout'});}catch(e){}sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);};
-(async()=>{try{$('visitDate').value=dateLocal();$('visitMonth').value=dateLocal().slice(0,7);setFilterFields();const s=await loginCheck();if(!s.success||!s.user){sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);return;}message('Sesi sah. Pilih tarikh atau bulan, kemudian tekan CARI.');}catch(e){message(e.message,'error');}})();
+(async()=>{try{$('visitDate').value=dateLocal();$('visitMonth').value=dateLocal().slice(0,7);setFilterFields();const s=await loginCheck();if(!s.success||!s.user){sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);return;}await search();}catch(e){message(e.message,'error');}})();
 })();
 </script>
 </body></html>
