@@ -25,7 +25,7 @@ button:disabled{opacity:.55;cursor:wait}.btn-light{background:#e8eef5;color:var(
 th,td{padding:13px 12px;border-bottom:1px solid #edf0f4;text-align:left;vertical-align:middle}th{color:var(--navy);background:#f5f8fc;white-space:nowrap}td{overflow-wrap:anywhere}
 .unit{font-weight:bold;color:var(--navy);white-space:nowrap}.badge{display:inline-block;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:bold;white-space:nowrap;background:#edf1f5;color:#475569}
 .badge.pending{background:#fff0d5;color:#895900}.badge.approved,.badge.add{background:#e2f5e9;color:#187044}.badge.update{background:#e7f0fb;color:#245a91}.badge.delete{background:#fee4e2;color:#b42318}
-.change-detail{min-width:190px;line-height:1.7}.empty{padding:24px 10px;text-align:center;color:var(--muted);line-height:1.7}
+.change-detail{min-width:190px;line-height:1.7}.approve-btn{width:36px;height:36px;padding:0;border-radius:50%;background:#187044;color:#fff;font-size:19px;line-height:1}.approve-btn:hover{background:#125a36}.approve-btn:disabled{opacity:.5;cursor:wait}.approved-mark{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#e2f5e9;color:#187044;font-size:18px;font-weight:bold}.empty{padding:24px 10px;text-align:center;color:var(--muted);line-height:1.7}
 .pagination{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;margin-top:18px}.pagination button{min-width:38px;min-height:36px;padding:8px 11px;border:1px solid #d6e0eb;border-radius:8px;background:#fff;color:var(--navy);font-size:12px}
 .pagination button.active{background:var(--blue);border-color:var(--blue);color:#fff}.pagination button:disabled{opacity:.4;cursor:not-allowed}.pagination .ellipsis{display:inline-flex;align-items:center;justify-content:center;min-width:20px;padding:0 2px;color:var(--muted);font-size:14px}
 .pagination-info{width:100%;margin-top:3px;text-align:center;color:var(--muted);font-size:12px}.footer{background:var(--navy);color:#d5e2ef;text-align:center;padding:23px 18px;font-size:12px;line-height:1.8}.footer strong{color:white}
@@ -52,8 +52,8 @@ th,td{padding:13px 12px;border-bottom:1px solid #edf0f4;text-align:left;vertical
 <button id="search" type="submit">CARI</button><button id="reset" type="button" class="btn-light">RESET</button>
 </form><div id="status" class="status-message">Sedang mengesahkan sesi login...</div></section>
 <section class="panel"><h3>Senarai Rekod Perubahan</h3><div class="table-wrap"><table>
-<thead><tr><th>Tarikh &amp; Masa</th><th>Tindakan</th><th>Unit Rumah</th><th>Maklumat Lama</th><th>Maklumat Baharu</th><th>Status</th></tr></thead>
-<tbody id="rows"><tr><td colspan="6" class="empty">Memuatkan rekod...</td></tr></tbody>
+<thead><tr><th>Tarikh &amp; Masa</th><th>Tindakan</th><th>Unit Rumah</th><th>Maklumat Lama</th><th>Maklumat Baharu</th><th>Status</th><th>Pengesahan</th></tr></thead>
+<tbody id="rows"><tr><td colspan="7" class="empty">Memuatkan rekod...</td></tr></tbody>
 </table></div><div id="pagination" class="pagination" aria-label="Navigasi halaman rekod"></div><div id="count" class="status-message"></div></section>
 </main>
 <footer class="footer"><strong>ALAM IDAMAN</strong><br>Visitor Management System (VMS)<br>Sila pastikan semua maklumat kenderaan adalah tepat.</footer>
@@ -75,7 +75,7 @@ function badgeClass(value){const v=String(value||'').toUpperCase();return ({PEND
 function renderPage(){
 const total=records.length,totalPages=Math.max(1,Math.ceil(total/PAGE_SIZE));if(currentPage>totalPages)currentPage=totalPages;
 const start=(currentPage-1)*PAGE_SIZE,pageRecords=records.slice(start,start+PAGE_SIZE);
-$('rows').innerHTML=pageRecords.length?pageRecords.map(r=>`<tr><td>${esc(r.dateTime||'—')}</td><td><span class="badge ${badgeClass(r.action)}">${esc(r.action||'—')}</span></td><td class="unit">${esc(r.unit||'—')}</td><td><div class="change-detail">${vehicleInfo(r.oldCategory,r.oldVehicleType,r.oldPlate)}</div></td><td><div class="change-detail">${vehicleInfo(r.newCategory,r.newVehicleType,r.newPlate)}</div></td><td><span class="badge ${badgeClass(r.status)}">${esc(r.status||'—')}</span></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Tiada rekod perubahan ditemui.</td></tr>';
+$('rows').innerHTML=pageRecords.length?pageRecords.map(r=>`<tr><td>${esc(r.dateTime||'—')}</td><td><span class="badge ${badgeClass(r.action)}">${esc(r.action||'—')}</span></td><td class="unit">${esc(r.unit||'—')}</td><td><div class="change-detail">${vehicleInfo(r.oldCategory,r.oldVehicleType,r.oldPlate)}</div></td><td><div class="change-detail">${vehicleInfo(r.newCategory,r.newVehicleType,r.newPlate)}</div></td><td><span class="badge ${badgeClass(r.status)}">${esc(r.status||'—')}</span></td><td>${String(r.status||'').toLowerCase()==='pending'?`<button type="button" class="approve-btn" data-approve="${Number(r.row)}" title="Tandakan sebagai Approved" aria-label="Tandakan sebagai Approved">✓</button>`:'<span class="approved-mark" title="Telah diluluskan" aria-label="Telah diluluskan">✓</span>'}</td></tr>`).join(''):'<tr><td colspan="7" class="empty">Tiada rekod perubahan ditemui.</td></tr>';
 $('count').textContent=total?`Memaparkan ${start+1}–${Math.min(start+PAGE_SIZE,total)} daripada ${total} rekod (${PAGE_SIZE} rekod setiap halaman).`:'0 rekod ditemui';
 const pagination=$('pagination');if(totalPages<=1){pagination.innerHTML='';return;}
 let html=`<button type="button" data-page="${currentPage-1}" ${currentPage===1?'disabled':''}>‹ Sebelum</button>`;
@@ -85,15 +85,34 @@ for(const page of sortedPages){if(previous&&page-previous>1)html+='<span class="
 html+=`<button type="button" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''}>Seterusnya ›</button><div class="pagination-info">Halaman ${currentPage} daripada ${totalPages}</div>`;pagination.innerHTML=html;
 }
 async function search(){
-$('rows').innerHTML='<tr><td colspan="6" class="empty">Mencari...</td></tr>';$('pagination').innerHTML='';
+$('rows').innerHTML='<tr><td colspan="7" class="empty">Mencari...</td></tr>';$('pagination').innerHTML='';
 const r=await api('changes',{q:$('q').value.trim(),status:$('statusFilter').value,actionFilter:$('actionFilter').value});
 if(!r.success)throw Error(r.message||'Gagal mendapatkan rekod perubahan.');records=r.records||[];currentPage=1;renderPage();
 }
 $('searchForm').onsubmit=e=>{e.preventDefault();search().then(()=>message('Carian rekod berjaya.')).catch(err=>message(err.message,'error'));};
 $('reset').onclick=()=>{$('q').value='';$('statusFilter').value='all';$('actionFilter').value='all';search().then(()=>message('Senarai rekod telah dipaparkan semula.')).catch(err=>message(err.message,'error'));};
+$('rows').onclick=async e=>{
+  const button=e.target.closest('[data-approve]');
+  if(!button||button.disabled)return;
+  const row=Number(button.dataset.approve);
+  if(!Number.isInteger(row)||row<2)return;
+  if(!confirm('Sahkan perubahan ini sebagai Approved?'))return;
+  button.disabled=true;
+  button.textContent='…';
+  try{
+    const result=await api('approveChange',{row});
+    if(!result.success)throw Error(result.message||'Gagal mengemas kini status.');
+    await search();
+    message('Status rekod berjaya ditukar kepada Approved.');
+  }catch(err){
+    button.disabled=false;
+    button.textContent='✓';
+    message(err.message,'error');
+  }
+};
 $('pagination').onclick=e=>{const button=e.target.closest('[data-page]');if(!button||button.disabled)return;const page=Number(button.dataset.page);if(!Number.isInteger(page)||page<1||page>Math.ceil(records.length/PAGE_SIZE))return;currentPage=page;renderPage();};
 $('logout').onclick=async()=>{try{await jsonp(LOGIN_API_URL,{action:'api',task:'logout'});}catch(e){}sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);};
-(async()=>{try{const s=await loginCheck();if(!s.success||!s.user){sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);return;}message('Sesi sah. Memuatkan rekod perubahan...');await search();message('Rekod perubahan berjaya dimuatkan.');}catch(e){message(e.message,'error');$('count').textContent='Gagal memuatkan data';$('rows').innerHTML='<tr><td colspan="6" class="empty">'+esc(e.message)+'</td></tr>';}})();
+(async()=>{try{const s=await loginCheck();if(!s.success||!s.user){sessionStorage.removeItem(TOKEN_KEY);location.replace(LOGIN_URL);return;}message('Sesi sah. Memuatkan rekod perubahan...');await search();message('Rekod perubahan berjaya dimuatkan.');}catch(e){message(e.message,'error');$('count').textContent='Gagal memuatkan data';$('rows').innerHTML='<tr><td colspan="7" class="empty">'+esc(e.message)+'</td></tr>';}})();
 })();
 </script>
 </body>
