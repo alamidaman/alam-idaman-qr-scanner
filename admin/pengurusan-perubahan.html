@@ -86,7 +86,7 @@ html+=`<button type="button" data-page="${currentPage+1}" ${currentPage===totalP
 }
 async function search(){
 $('rows').innerHTML='<tr><td colspan="6" class="empty">Mencari...</td></tr>';$('pagination').innerHTML='';
-const r=await api('changes',{q:$('q').value.trim(),status:$('statusFilter').value,action:$('actionFilter').value});
+const r=await api('changes',{q:$('q').value.trim(),status:$('statusFilter').value,actionFilter:$('actionFilter').value});
 if(!r.success)throw Error(r.message||'Gagal mendapatkan rekod perubahan.');records=r.records||[];currentPage=1;renderPage();
 }
 $('searchForm').onsubmit=e=>{e.preventDefault();search().then(()=>message('Carian rekod berjaya.')).catch(err=>message(err.message,'error'));};
